@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/dashboard"
+        android:title="Dashboard"
+        android:icon="@drawable/ic_dashboard_foreground"/>
+    <item
+        android:id="@+id/tasks"
+        android:title="Tasks"
+        android:icon="@drawable/ic_tasks_foreground"/>
+    <item
+        android:id="@+id/reminders"
+        android:title="Reminders"
+        android:icon="@drawable/ic_reminder_foreground"/>
+    <item
+        android:id="@+id/more"
+        android:title="More"
+        android:icon="@drawable/ic_more_foreground"/>
+</menu>
