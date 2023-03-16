@@ -1,6 +1,7 @@
 package com.example.todoapp.viewmodel
 
 import android.graphics.Bitmap
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -43,7 +44,12 @@ class LoginViewModel(private val repository: LoginSignUpRepository) : ViewModel(
                 val userId=repository.login(email,password)
 
                 if(userId!=-1L)
+                {
+
                     _mutableLiveDataLoginStatus.postValue("success")
+
+                }
+
                 else
                     _mutableLiveDataLoginStatus.postValue("failed")
 

@@ -3,10 +3,10 @@ package com.example.todoapp
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import com.example.todoapp.Fragments.DashboardFragment
-import com.example.todoapp.Fragments.MoreFragment
-import com.example.todoapp.Fragments.ReminderFragment
-import com.example.todoapp.Fragments.TasksFragment
+import com.example.todoapp.ui.Fragments.DashboardFragment
+import com.example.todoapp.ui.Fragments.MoreFragment
+import com.example.todoapp.ui.Fragments.ReminderFragment
+import com.example.todoapp.ui.Fragments.TasksFragment
 import com.example.todoapp.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -18,10 +18,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-        val dashboardFragment=DashboardFragment()
+        val dashboardFragment= DashboardFragment()
         val tasksFragment= TasksFragment()
         val reminderFragment= ReminderFragment()
-        val moreFragment=MoreFragment()
+        val moreFragment= MoreFragment()
 
         setCurrentFragment(dashboardFragment)
 

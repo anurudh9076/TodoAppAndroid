@@ -80,7 +80,7 @@ class TodoDBHelper(context: Context) :
 
         val values = ContentValues()
         values.put(KEY_NAME, name)
-        values.put(KEY_EMAIL,email)
+        values.put(KEY_EMAIL,email.lowercase())
         values.put(KEY_PASSWORD, password)
 
         if (image_bitmap != null) {
@@ -127,11 +127,12 @@ class TodoDBHelper(context: Context) :
      */
     fun login(email:String,password:String):Long
     {
+
         val db: SQLiteDatabase = this.readableDatabase
         var loggedInUserId=-1L
 
         val cursor = db.rawQuery(
-            "SELECT $KEY_ID_USER FROM $TABLE_USER WHERE $KEY_EMAIL = '$email'",null
+            "SELECT $KEY_ID_USER FROM $TABLE_USER WHERE $KEY_EMAIL = '${email.lowercase()}' AND $KEY_PASSWORD = '$password'",null
         )
 
         try {

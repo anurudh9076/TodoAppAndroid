@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.LoginActivity">
+    tools:context=".ui.activities.LoginActivity">
 
 
     <androidx.constraintlayout.widget.Guideline
@@ -60,7 +60,7 @@
             android:dropDownVerticalOffset="4dp"
             android:ems="10"
             android:imeOptions="actionNext|flagNoExtractUi"
-            android:inputType="textCapSentences"
+            android:inputType="textEmailAddress"
             android:padding="16dp"
             android:textSize="16dp" />
 

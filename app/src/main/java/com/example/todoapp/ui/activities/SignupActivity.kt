@@ -1,4 +1,4 @@
-package com.example.todoapp.activities
+package com.example.todoapp.ui.activities
 
 import android.content.Intent
 import android.graphics.Bitmap
@@ -46,7 +46,7 @@ class SignupActivity : AppCompatActivity() {
 
         progressBar = ProgressBar(this)
         val dbHelper = TodoDBHelper.getInstance(this)
-        val loginSignUpRepository = LoginSignUpRepository(dbHelper)
+        val loginSignUpRepository = LoginSignUpRepository(dbHelper, applicationContext)
         signUpViewModel = ViewModelProvider(
             this,
             SignUpViewModelFactory(loginSignUpRepository)
@@ -86,12 +86,17 @@ class SignupActivity : AppCompatActivity() {
             val name = binding.edtSignupName.text.toString()
             val email = binding.edtSignupEmail.text.toString()
             val password = binding.edtSignupPassword.text.toString()
+            val confirmPassword = binding.edtSignupConfirmPassword.text.toString()
 
 
 
-            signUpViewModel.signUp(name, email, password, image)
+            signUpViewModel.signUp(name, email, password, confirmPassword, image)
 
 
+        }
+
+        binding.arrowBack.setOnClickListener {
+            finish()
         }
     }
 
@@ -112,6 +117,7 @@ class SignupActivity : AppCompatActivity() {
                     "User creation failed\nplease try again",
                     Toast.LENGTH_LONG
                 ).show()
+
                 "success" -> {
                     Toast.makeText(this, "User successfully created", Toast.LENGTH_SHORT).show()
 

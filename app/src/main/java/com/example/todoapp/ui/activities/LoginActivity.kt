@@ -1,4 +1,4 @@
-package com.example.todoapp.activities
+package com.example.todoapp.ui.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -16,7 +16,6 @@ import com.example.todoapp.databinding.ActivityLoginBinding
 import com.example.todoapp.repository.LoginSignUpRepository
 import com.example.todoapp.viewmodel.LoginViewModel
 import com.example.todoapp.viewmodel.LoginViewModelFactory
-import com.example.todoapp.viewmodel.SignUpViewModel
 
 
 class LoginActivity : AppCompatActivity() {
@@ -33,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
 
         progressBar = ProgressBar(this)
         val dbHelper = TodoDBHelper.getInstance(this)
-        val loginSignUpRepository = LoginSignUpRepository(dbHelper)
+        val loginSignUpRepository = LoginSignUpRepository(dbHelper,applicationContext)
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory(loginSignUpRepository))[LoginViewModel::class.java]
 
 
@@ -49,7 +48,7 @@ class LoginActivity : AppCompatActivity() {
 
 
         binding.btnSignUp.setOnClickListener{
-            val intent=Intent(this,SignupActivity::class.java)
+            val intent=Intent(this, SignupActivity::class.java)
             startActivity(intent)
         }
         binding.btnLoginPasswordVisibility.setOnClickListener {
@@ -95,6 +94,12 @@ class LoginActivity : AppCompatActivity() {
 
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
+
+                    val pref = getSharedPreferences("login", MODE_PRIVATE)
+                    val editor = pref.edit()
+
+                    editor.putBoolean("flag", true)
+                    editor.apply()
                 }
 
                 else -> {
@@ -103,4 +108,6 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
+
+
 }

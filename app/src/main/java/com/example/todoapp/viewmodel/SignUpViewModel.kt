@@ -21,9 +21,9 @@ class SignUpViewModel(private val repository: LoginSignUpRepository) :ViewModel(
     val liveDataSignUpStatus:LiveData<String>
         get()=_mutableLiveDataSignUpStatus
 
-    fun signUp(name:String,email:String,password:String,image_bitmap: Bitmap?)
+    fun signUp(name:String,email:String,password:String,confirmPassword:String,image_bitmap: Bitmap?)
     {
-        if(name.isEmpty()||email.isEmpty()||password.isEmpty())
+        if(name.isEmpty()||email.isEmpty()||password.isEmpty()||confirmPassword.isEmpty())
         {
            _mutableLiveDataSignUpStatus.value="All field are required"
             return
@@ -38,7 +38,11 @@ class SignUpViewModel(private val repository: LoginSignUpRepository) :ViewModel(
             _mutableLiveDataSignUpStatus.value="password should contain min 6 char"
             return
         }
-
+        else if(password != confirmPassword)
+        {
+            _mutableLiveDataSignUpStatus.value="confirm password not matching with password"
+            return
+        }
         else
         {
             _mutableLiveDataIsSigningUp.value=true
