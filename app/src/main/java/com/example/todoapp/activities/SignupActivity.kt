@@ -6,9 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.InputType
-import android.text.TextUtils
 import android.util.Log
-import android.util.Patterns
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -17,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.todoapp.DbHelper.TodoDBHelper
 import com.example.todoapp.databinding.ActivitySignupBinding
-import com.example.todoapp.repository.SignUpRepository
+import com.example.todoapp.repository.LoginSignUpRepository
 import com.example.todoapp.viewmodel.SignUpViewModel
 import com.example.todoapp.viewmodel.SignUpViewModelFactory
 
@@ -48,10 +46,10 @@ class SignupActivity : AppCompatActivity() {
 
         progressBar = ProgressBar(this)
         val dbHelper = TodoDBHelper.getInstance(this)
-        val signUpRepository = SignUpRepository(dbHelper)
+        val loginSignUpRepository = LoginSignUpRepository(dbHelper)
         signUpViewModel = ViewModelProvider(
             this,
-            SignUpViewModelFactory(signUpRepository)
+            SignUpViewModelFactory(loginSignUpRepository)
         )[SignUpViewModel::class.java]
 
 
@@ -125,7 +123,6 @@ class SignupActivity : AppCompatActivity() {
                     Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
                 }
             }
-
         }
     }
 

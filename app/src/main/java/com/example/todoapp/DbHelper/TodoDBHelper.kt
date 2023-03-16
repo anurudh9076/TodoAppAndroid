@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
 import android.util.Log
-import com.example.todoapp.models.User
 import java.io.ByteArrayOutputStream
 
 class TodoDBHelper(context: Context) :
@@ -121,7 +120,33 @@ class TodoDBHelper(context: Context) :
         } finally {
             return insertedRowID
         }
+    }
 
+    /**
+     * return id of user if successfully logged in else -1 otherwise
+     */
+    fun login(email:String,password:String):Long
+    {
+        val db: SQLiteDatabase = this.readableDatabase
+        var loggedInUserId=-1L
+
+        val cursor = db.rawQuery(
+            "SELECT $KEY_ID_USER FROM $TABLE_USER WHERE $KEY_EMAIL = '$email'",null
+        )
+
+        try {
+
+            cursor.moveToNext()
+           loggedInUserId = cursor.getLong(0)
+            cursor.close()
+
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+        finally {
+            return loggedInUserId
+        }
 
     }
+
 }

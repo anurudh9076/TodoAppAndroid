@@ -3,16 +3,14 @@ package com.example.todoapp.viewmodel
 import android.graphics.Bitmap
 import android.text.TextUtils
 import android.util.Patterns
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todoapp.activities.SignupActivity
-import com.example.todoapp.repository.SignUpRepository
+import com.example.todoapp.repository.LoginSignUpRepository
 import kotlinx.coroutines.*
 
-class SignUpViewModel(private val repository: SignUpRepository) :ViewModel() {
+class SignUpViewModel(private val repository: LoginSignUpRepository) :ViewModel() {
 
     private val _mutableLiveDataIsSigningUp=MutableLiveData<Boolean>()
     val liveDataIsSigningUp:LiveData<Boolean>

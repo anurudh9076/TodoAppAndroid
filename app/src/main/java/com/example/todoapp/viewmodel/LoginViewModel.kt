@@ -1,45 +1,60 @@
 package com.example.todoapp.viewmodel
 
 import android.graphics.Bitmap
-import android.provider.ContactsContract.CommonDataKinds.Email
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.todoapp.models.User
-import kotlin.math.log
+import androidx.lifecycle.viewModelScope
+import com.example.todoapp.repository.LoginSignUpRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
-    private val _errorLiveData = MutableLiveData<String>()
-    val errorLiveData: LiveData<String>
-        get() = _errorLiveData
+class LoginViewModel(private val repository: LoginSignUpRepository) : ViewModel() {
 
-    private val _progressBarLiveData = MutableLiveData<Boolean>()
-    val progressBarLiveData: LiveData<Boolean>
-        get() = _progressBarLiveData
+
+    private val _mutableLiveDataIsLoggingIn=MutableLiveData<Boolean>()
+    val liveDataIsLoggingIn:LiveData<Boolean>
+        get()=_mutableLiveDataIsLoggingIn
+
+
+    private val _mutableLiveDataLoginStatus=MutableLiveData<String>()
+    val liveDataLoginStatus:LiveData<String>
+        get()=_mutableLiveDataLoginStatus
 
 
 
     fun loginUser(email: String, password: String) {
-        //input validation
-        if (email.isEmpty() || password.isEmpty()) {
-            //failure
-            _errorLiveData.value = "Please enter email and password."
+
+        if(email.isEmpty()||password.isEmpty())
+        {
+            _mutableLiveDataLoginStatus.value="All field are required"
             return
         }
 
 
+        else
+        {
+            _mutableLiveDataIsLoggingIn.value=true
+
+            viewModelScope.launch(Dispatchers.IO) {
+
+                delay(1000)
+                val userId=repository.login(email,password)
+
+                if(userId!=-1L)
+                    _mutableLiveDataLoginStatus.postValue("success")
+                else
+                    _mutableLiveDataLoginStatus.postValue("failed")
+
+                _mutableLiveDataIsLoggingIn.postValue(false)
+
+            }
 
 
-//        _progressBarLiveData.value = true
-//        //use coroutines
-//        {
-//            repo.login(email, pass)
-//        }
+        }
 
     }
 
-    fun signUpForTodo(name: String, email: String, password: String, image: Bitmap) {
-
-    }
 
 }
