@@ -1,11 +1,14 @@
 package com.example.todoapp.repository
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
+import com.example.todoapp.CustomApplication
 import com.example.todoapp.DbHelper.TodoDBHelper
+import com.example.todoapp.constants.Constants
 
-class LoginSignUpRepository(private val dbHelper: TodoDBHelper,private val context: Context) {
+class LoginSignUpRepository(private val dbHelper: TodoDBHelper) {
 
     fun singUp(name:String,email:String,password:String,image_bitmap: Bitmap?):Long
     {
@@ -20,10 +23,10 @@ class LoginSignUpRepository(private val dbHelper: TodoDBHelper,private val conte
         val userId=dbHelper.login(email,password)
         if(userId!=-1L)
         {
-            val pref = context.getSharedPreferences("login", AppCompatActivity.MODE_PRIVATE)
+            val pref = CustomApplication.sharedPreferences
             val editor = pref.edit()
-            editor.putBoolean("user_logged_in", true)
-            editor.putLong("user_id",userId)
+            editor.putBoolean(Constants.USER_LOGGED_IN, true)
+            editor.putLong(Constants.USER_ID,userId)
             editor.apply()
         }
 

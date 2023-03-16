@@ -23,7 +23,7 @@ import com.example.todoapp.viewmodel.SignUpViewModelFactory
 class SignupActivity : AppCompatActivity() {
     private val TAG = "MyTag"
     private lateinit var binding: ActivitySignupBinding
-    lateinit var signUpViewModel: SignUpViewModel
+    private lateinit var signUpViewModel: SignUpViewModel
     private var imageBitmap: Bitmap? = null
     private lateinit var progressBar: ProgressBar
 
@@ -46,7 +46,7 @@ class SignupActivity : AppCompatActivity() {
 
         progressBar = ProgressBar(this)
         val dbHelper = TodoDBHelper.getInstance(this)
-        val loginSignUpRepository = LoginSignUpRepository(dbHelper, applicationContext)
+        val loginSignUpRepository = LoginSignUpRepository(dbHelper)
         signUpViewModel = ViewModelProvider(
             this,
             SignUpViewModelFactory(loginSignUpRepository)

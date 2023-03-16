@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
 
         progressBar = ProgressBar(this)
         val dbHelper = TodoDBHelper.getInstance(this)
-        val loginSignUpRepository = LoginSignUpRepository(dbHelper,applicationContext)
+        val loginSignUpRepository = LoginSignUpRepository(dbHelper)
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory(loginSignUpRepository))[LoginViewModel::class.java]
 
 
@@ -95,11 +95,6 @@ class LoginActivity : AppCompatActivity() {
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
 
-                    val pref = getSharedPreferences("login", MODE_PRIVATE)
-                    val editor = pref.edit()
-
-                    editor.putBoolean("flag", true)
-                    editor.apply()
                 }
 
                 else -> {
