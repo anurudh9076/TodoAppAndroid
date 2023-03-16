@@ -1,15 +1,16 @@
 package com.example.todoapp.viewmodel
 
 import android.graphics.Bitmap
+import android.text.TextUtils
+import android.util.Patterns
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todoapp.activities.SignupActivity
 import com.example.todoapp.repository.SignUpRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class SignUpViewModel(private val repository: SignUpRepository) :ViewModel() {
 
@@ -18,26 +19,55 @@ class SignUpViewModel(private val repository: SignUpRepository) :ViewModel() {
     get()=_mutableLiveDataIsSigningUp
 
 
-    private val _mutableLiveDataSignUpStatus=MutableLiveData<Boolean>()
-    val liveDataSignUpStatus:LiveData<Boolean>
+    private val _mutableLiveDataSignUpStatus=MutableLiveData<String>()
+    val liveDataSignUpStatus:LiveData<String>
         get()=_mutableLiveDataSignUpStatus
 
     fun signUp(name:String,email:String,password:String,image_bitmap: Bitmap?)
     {
-        _mutableLiveDataIsSigningUp.value=true
+        if(name.isEmpty()||email.isEmpty()||password.isEmpty())
+        {
+           _mutableLiveDataSignUpStatus.value="All field are required"
+            return
+        }
+        else if(!isValidEmail(email))
+        {
+            _mutableLiveDataSignUpStatus.value="please enter a valid email"
+            return
+        }
+        else if(password.length<6)
+        {
+            _mutableLiveDataSignUpStatus.value="password should contain min 6 char"
+            return
+        }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        else
+        {
+            _mutableLiveDataIsSigningUp.value=true
 
-            val insertedRowId=repository.singUp(name,email,password,image_bitmap)
-            if(insertedRowId==-1L)
-                _mutableLiveDataSignUpStatus.postValue(true)
-            else
-                _mutableLiveDataSignUpStatus.postValue(false)
+            viewModelScope.launch(Dispatchers.IO) {
 
-            _mutableLiveDataIsSigningUp.postValue(false)
+                delay(1000)
+                val insertedRowId=repository.singUp(name,email,password,image_bitmap)
+
+                if(insertedRowId!=-1L)
+                    _mutableLiveDataSignUpStatus.postValue("success")
+                else
+                    _mutableLiveDataSignUpStatus.postValue("failed")
+
+                _mutableLiveDataIsSigningUp.postValue(false)
+
+            }
+
 
         }
 
+
     }
+
+    private fun isValidEmail(target: CharSequence?): Boolean {
+        return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches()
+    }
+
 
 }

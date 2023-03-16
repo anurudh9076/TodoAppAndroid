@@ -6,7 +6,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.InputType
+import android.text.TextUtils
 import android.util.Log
+import android.util.Patterns
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -22,96 +24,114 @@ import com.example.todoapp.viewmodel.SignUpViewModelFactory
 
 class SignupActivity : AppCompatActivity() {
     private val TAG = "MyTag"
-    private lateinit var binding:ActivitySignupBinding
-    lateinit var signUpViewModel:SignUpViewModel
-    private var imageBitmap:Bitmap?=null
-    private val progressBar=ProgressBar(this)
+    private lateinit var binding: ActivitySignupBinding
+    lateinit var signUpViewModel: SignUpViewModel
+    private var imageBitmap: Bitmap? = null
+    private lateinit var progressBar: ProgressBar
 
 
-    private val chooseImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-        it.data?.data?.let {
-            val imageUri: Uri = it
-            var bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri)
-            Log.d(TAG, ":hello ")
-            imageBitmap=bitmap
-            binding.imgViewSignup.setImageBitmap(bitmap)
+    private val chooseImageLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            it.data?.data?.let {
+                val imageUri: Uri = it
+                var bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri)
+                Log.d(TAG, ":hello ")
+                imageBitmap = bitmap
+                binding.imgViewSignup.setImageBitmap(bitmap)
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding= ActivitySignupBinding.inflate(layoutInflater)
+        binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        progressBar = ProgressBar(this)
+        val dbHelper = TodoDBHelper.getInstance(this)
+        val signUpRepository = SignUpRepository(dbHelper)
+        signUpViewModel = ViewModelProvider(
+            this,
+            SignUpViewModelFactory(signUpRepository)
+        )[SignUpViewModel::class.java]
 
 
         setOnClickListeners()
         setObservers()
+
 //        progressBar.visibility=View.GONE
-
-        val dbHelper=TodoDBHelper.getInstance(this)
-        val signUpRepository=SignUpRepository(dbHelper)
-        signUpViewModel= ViewModelProvider(this,SignUpViewModelFactory(signUpRepository))[SignUpViewModel::class.java]
-
 
 
     }
 
-    private fun setOnClickListeners()
-    {
+    private fun setOnClickListeners() {
         binding.btnSignupPasswordVisibility.setOnClickListener {
 
-            if(binding.edtSignupPassword.inputType== InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)
-                binding.edtSignupPassword.inputType=
+            if (binding.edtSignupPassword.inputType == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)
+                binding.edtSignupPassword.inputType =
                     InputType.TYPE_TEXT_VARIATION_PASSWORD.or(InputType.TYPE_CLASS_TEXT)
             else
-                binding.edtSignupPassword.inputType= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                binding.edtSignupPassword.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             binding.edtSignupPassword.setSelection(binding.edtSignupPassword.text.length);
         }
 
         binding.btnSignIn.setOnClickListener {
-            val intent= Intent(this,LoginActivity::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
         }
 
         binding.imgViewSignup.setOnClickListener {
-                chooseImageFromGallery()
+            chooseImageFromGallery()
         }
         binding.btnCreate.setOnClickListener {
 
-            val image=imageBitmap
-            val name=binding.edtSignupName.text.toString()
-            val email=binding.edtSignupEmail.text.toString()
-            val password=binding.edtSignupPassword.text.toString()
+            val image = imageBitmap
+            val name = binding.edtSignupName.text.toString()
+            val email = binding.edtSignupEmail.text.toString()
+            val password = binding.edtSignupPassword.text.toString()
 
 
-            signUpViewModel.signUp(name,email,password,image)
+
+            signUpViewModel.signUp(name, email, password, image)
+
 
         }
     }
 
-    private fun setObservers()
-    {
+    private fun setObservers() {
         signUpViewModel.liveDataIsSigningUp.observe(this) {
 
-            if(it==true)
-                progressBar.visibility=View.VISIBLE
+            if (it == true)
+                binding.progressBarSignUp.visibility = View.VISIBLE
             else
-                progressBar.visibility=View.GONE
+                binding.progressBarSignUp.visibility = View.GONE
 
         }
         signUpViewModel.liveDataSignUpStatus.observe(this)
         {
-            if(it==false)
-            {
+            when (it) {
+                "failed" -> Toast.makeText(
+                    this,
+                    "User creation failed\nplease try again",
+                    Toast.LENGTH_LONG
+                ).show()
+                "success" -> {
+                    Toast.makeText(this, "User successfully created", Toast.LENGTH_SHORT).show()
 
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                }
+
+                else -> {
+                    Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+                }
             }
+
         }
     }
 
     private fun chooseImageFromGallery() {
-        val intent=Intent()
+        val intent = Intent()
         intent.type = "image/*"
-
         intent.action = Intent.ACTION_GET_CONTENT
         chooseImageLauncher.launch(intent)
     }
