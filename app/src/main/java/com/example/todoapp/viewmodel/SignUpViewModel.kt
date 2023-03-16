@@ -7,10 +7,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todoapp.repository.LoginSignUpRepository
+import com.example.todoapp.repository.TodoRepository
 import kotlinx.coroutines.*
 
-class SignUpViewModel(private val repository: LoginSignUpRepository) :ViewModel() {
+class SignUpViewModel(private val repository: TodoRepository) :ViewModel() {
 
     private val _mutableLiveDataIsSigningUp=MutableLiveData<Boolean>()
     val liveDataIsSigningUp:LiveData<Boolean>

@@ -14,6 +14,6 @@ class CustomApplication :Application(){
     override fun onCreate() {
         super.onCreate()
         Log.d("MyTag", "onCreate:application ")
-        sharedPreferences=getSharedPreferences(Constants.USER_LOGIN_STATE, AppCompatActivity.MODE_PRIVATE)
+        sharedPreferences=getSharedPreferences(Constants.USER_LOGIN_STATE_PREFERENCE, AppCompatActivity.MODE_PRIVATE)
     }
 }

@@ -1,17 +1,15 @@
 package com.example.todoapp.viewmodel
 
-import android.graphics.Bitmap
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todoapp.repository.LoginSignUpRepository
+import com.example.todoapp.repository.TodoRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val repository: LoginSignUpRepository) : ViewModel() {
+class LoginViewModel(private val repository: TodoRepository) : ViewModel() {
 
 
     private val _mutableLiveDataIsLoggingIn=MutableLiveData<Boolean>()

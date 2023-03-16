@@ -1,14 +1,12 @@
 package com.example.todoapp.repository
 
-import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
-import androidx.appcompat.app.AppCompatActivity
 import com.example.todoapp.CustomApplication
 import com.example.todoapp.DbHelper.TodoDBHelper
 import com.example.todoapp.constants.Constants
+import com.example.todoapp.models.User
 
-class LoginSignUpRepository(private val dbHelper: TodoDBHelper) {
+class TodoRepository(private val dbHelper: TodoDBHelper) {
 
     fun singUp(name:String,email:String,password:String,image_bitmap: Bitmap?):Long
     {
@@ -25,12 +23,38 @@ class LoginSignUpRepository(private val dbHelper: TodoDBHelper) {
         {
             val pref = CustomApplication.sharedPreferences
             val editor = pref.edit()
-            editor.putBoolean(Constants.USER_LOGGED_IN, true)
+            editor.putBoolean(Constants.IS_USER_LOGGED_IN, true)
             editor.putLong(Constants.USER_ID,userId)
             editor.apply()
         }
 
             return userId
+    }
+
+    fun logout():Boolean
+    {
+
+            val pref = CustomApplication.sharedPreferences
+            val editor = pref.edit()
+            editor.putBoolean(Constants.IS_USER_LOGGED_IN, false)
+            editor.putLong(Constants.USER_ID,-1L)
+            editor.apply()
+            return true
+
+
+    }
+    fun getLoggedInUser():User?
+    {
+        val pref = CustomApplication.sharedPreferences
+
+        val userId=pref.getLong(Constants.USER_ID,-1L)
+        if(userId==-1L)
+        {
+            return null
+        }
+
+        return dbHelper.getUser(userId)
+
     }
 
 }

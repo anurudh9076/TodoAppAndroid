@@ -20,7 +20,7 @@
         android:layout_height="80dp"
         android:layout_width="match_parent"
         android:id="@+id/iv_user_dashboard"
-        android:src="@drawable/sample_image_anime"
+
         android:scaleType="centerCrop"/>
 
     </androidx.cardview.widget.CardView>

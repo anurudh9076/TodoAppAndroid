@@ -11,9 +11,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.todoapp.DbHelper.TodoDBHelper
-import com.example.todoapp.MainActivity
 import com.example.todoapp.databinding.ActivityLoginBinding
-import com.example.todoapp.repository.LoginSignUpRepository
+import com.example.todoapp.repository.TodoRepository
 import com.example.todoapp.viewmodel.LoginViewModel
 import com.example.todoapp.viewmodel.LoginViewModelFactory
 
@@ -32,8 +31,8 @@ class LoginActivity : AppCompatActivity() {
 
         progressBar = ProgressBar(this)
         val dbHelper = TodoDBHelper.getInstance(this)
-        val loginSignUpRepository = LoginSignUpRepository(dbHelper)
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory(loginSignUpRepository))[LoginViewModel::class.java]
+        val todoRepository = TodoRepository(dbHelper)
+        loginViewModel = ViewModelProvider(this, LoginViewModelFactory(todoRepository))[LoginViewModel::class.java]
 
 
         setOnClickListeners()
@@ -94,6 +93,7 @@ class LoginActivity : AppCompatActivity() {
 
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
+                    finish()
 
                 }
 

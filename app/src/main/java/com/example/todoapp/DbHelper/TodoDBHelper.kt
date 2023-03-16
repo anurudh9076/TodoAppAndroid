@@ -5,7 +5,9 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
+import com.example.todoapp.models.User
 import java.io.ByteArrayOutputStream
 
 class TodoDBHelper(context: Context) :
@@ -53,8 +55,8 @@ class TodoDBHelper(context: Context) :
 
         db!!.execSQL(
             "CREATE TABLE " + TABLE_IMAGE + "("
-                    + TodoDBHelper.KEY_ID_IMAGE + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + TodoDBHelper.KEY_IMAGE_BLOB + " BLOB " + ")"
+                    + KEY_ID_IMAGE + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + KEY_IMAGE_BLOB + " BLOB " + ")"
         )
 
 
@@ -74,13 +76,13 @@ class TodoDBHelper(context: Context) :
 
     }
 
-    fun createUser(name:String,email:String,password:String,image_bitmap: Bitmap?): Long {
+    fun createUser(name: String, email: String, password: String, image_bitmap: Bitmap?): Long {
         var insertedRowId: Long = -1
         val db = this.writableDatabase
 
         val values = ContentValues()
         values.put(KEY_NAME, name)
-        values.put(KEY_EMAIL,email.lowercase())
+        values.put(KEY_EMAIL, email.lowercase())
         values.put(KEY_PASSWORD, password)
 
         if (image_bitmap != null) {
@@ -99,7 +101,7 @@ class TodoDBHelper(context: Context) :
         try {
             insertedRowId = db.insert(TABLE_USER, null, values)
         } catch (e: Exception) {
-           e.printStackTrace()
+            e.printStackTrace()
         }
         return insertedRowId
     }
@@ -117,36 +119,83 @@ class TodoDBHelper(context: Context) :
 
         } catch (e: Exception) {
             e.printStackTrace()
-        } finally {
-            return insertedRowID
         }
+        return insertedRowID
+
     }
 
     /**
      * return id of user if successfully logged in else -1 otherwise
      */
-    fun login(email:String,password:String):Long
-    {
+    fun login(email: String, password: String): Long {
 
         val db: SQLiteDatabase = this.readableDatabase
-        var loggedInUserId=-1L
+        var loggedInUserId = -1L
 
         val cursor = db.rawQuery(
-            "SELECT $KEY_ID_USER FROM $TABLE_USER WHERE $KEY_EMAIL = '${email.lowercase()}' AND $KEY_PASSWORD = '$password'",null
+            "SELECT $KEY_ID_USER FROM $TABLE_USER WHERE $KEY_EMAIL = '${email.lowercase()}' AND $KEY_PASSWORD = '$password'",
+            null
         )
 
         try {
 
             cursor.moveToNext()
-           loggedInUserId = cursor.getLong(0)
+            loggedInUserId = cursor.getLong(0)
             cursor.close()
 
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
-        finally {
-            return loggedInUserId
+        return loggedInUserId
+
+    }
+
+    fun getUser(userId: Long): User? {
+
+        var user: User? = null
+        val db: SQLiteDatabase = this.readableDatabase
+
+        val cursor = db.rawQuery(
+            "SELECT * FROM $TABLE_USER WHERE $KEY_ID_USER = $userId ", null
+        )
+
+        try {
+
+            cursor.moveToNext()
+
+            val loggedInUserId = cursor.getLong(0)
+            val name = cursor.getString(1)
+            val email = cursor.getString(2)
+            val imageId = cursor.getLong(4)
+            user = User(loggedInUserId, name, email, imageId, null)
+            cursor.close()
+            if (imageId != -1L) {
+                try {
+                    cursor.close()
+
+                    val imageCursor = db.rawQuery(
+                        "SELECT * FROM $TABLE_IMAGE WHERE $KEY_ID_IMAGE=$imageId ", null
+                    )
+
+                    imageCursor.moveToNext()
+                    val imageBlob = imageCursor.getBlob(1)
+                    imageCursor.close()
+
+                    val imageBitmap = BitmapFactory.decodeByteArray(imageBlob, 0, imageBlob.size)
+                    user.image_bitmap = imageBitmap
+
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
         }
+
+        return user
 
     }
 

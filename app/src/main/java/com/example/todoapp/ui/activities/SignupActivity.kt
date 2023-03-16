@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.todoapp.DbHelper.TodoDBHelper
 import com.example.todoapp.databinding.ActivitySignupBinding
-import com.example.todoapp.repository.LoginSignUpRepository
+import com.example.todoapp.repository.TodoRepository
 import com.example.todoapp.viewmodel.SignUpViewModel
 import com.example.todoapp.viewmodel.SignUpViewModelFactory
 
@@ -46,10 +46,10 @@ class SignupActivity : AppCompatActivity() {
 
         progressBar = ProgressBar(this)
         val dbHelper = TodoDBHelper.getInstance(this)
-        val loginSignUpRepository = LoginSignUpRepository(dbHelper)
+        val todoRepository = TodoRepository(dbHelper)
         signUpViewModel = ViewModelProvider(
             this,
-            SignUpViewModelFactory(loginSignUpRepository)
+            SignUpViewModelFactory(todoRepository)
         )[SignUpViewModel::class.java]
 
 

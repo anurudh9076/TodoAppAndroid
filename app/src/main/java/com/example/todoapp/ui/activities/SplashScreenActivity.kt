@@ -3,7 +3,6 @@ package com.example.todoapp.ui.activities
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.todoapp.MainActivity
 import com.example.todoapp.R
 import com.example.todoapp.constants.Constants
 import kotlinx.coroutines.GlobalScope
@@ -18,8 +17,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
         GlobalScope.launch {
             delay(2000)
-            val pref = getSharedPreferences(Constants.USER_LOGIN_STATE, MODE_PRIVATE)
-            val check = pref.getBoolean(Constants.USER_LOGGED_IN, false)
+            val pref = getSharedPreferences(Constants.USER_LOGIN_STATE_PREFERENCE, MODE_PRIVATE)
+            val check = pref.getBoolean(Constants.IS_USER_LOGGED_IN, false)
 
             val intent: Intent = if (check) {
                 Intent(applicationContext, MainActivity::class.java)

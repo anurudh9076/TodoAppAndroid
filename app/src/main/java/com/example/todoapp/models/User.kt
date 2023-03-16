@@ -6,8 +6,7 @@ data class User(
     var id:Long,
     var name:String,
     var email: String,
-    var password: String,
-    var image_id:Int,
+    var image_id:Long,
     var image_bitmap:Bitmap?)
 {
 
