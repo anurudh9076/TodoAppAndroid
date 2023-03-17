@@ -10,7 +10,13 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
 
     fun singUp(name:String,email:String,password:String,image_bitmap: Bitmap?):Long
     {
-       return dbHelper.createUser(name,email,password,image_bitmap)
+        val userId=dbHelper.createUser(name,email,password,image_bitmap)
+
+        if(userId!=-1L)
+        {
+            createDefaultCategories(userId)
+        }
+        return  userId
     }
 
 
@@ -56,5 +62,22 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
         return dbHelper.getUser(userId)
 
     }
+
+    fun createCategory( name:String,description:String,imageBitmap:Bitmap?, userId:Long): Long
+    {
+        return dbHelper.createCategory(name,description,imageBitmap,userId)
+    }
+
+    private fun createDefaultCategories(userId:Long)
+    {
+            dbHelper.createCategory("android","android related category",null,userId)
+            dbHelper.createCategory("tech","tech related category",null,userId)
+            dbHelper.createCategory("desktop","desktop related category",null,userId)
+            dbHelper.createCategory("backend","backend related category",null,userId)
+
+
+    }
+
+
 
 }

@@ -22,9 +22,11 @@ class TodoDBHelper(context: Context) :
     companion object {
         private const val TAG = "ToDoDBHelper"
         private const val DATABASE_NAME = "todo_database"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 1
         private const val TABLE_USER = "user"
-        private const val KEY_ID_USER = "id"
+
+        private const val KEY_ID = "_id"
+        private const val KEY_ID_USER = "user_id"
         private const val KEY_NAME = "name"
         private const val KEY_EMAIL = "email"
 
@@ -33,6 +35,18 @@ class TodoDBHelper(context: Context) :
         private const val TABLE_IMAGE = "todo_images"
         private const val KEY_ID_IMAGE = "image_id"
         private const val KEY_IMAGE_BLOB = "image"
+
+        private const val TABLE_CATEGORY = "todo_categories"
+        private const val KEY_CATEGORY_NAME = "category_name"
+        private const val KEY_CATEGORY_DESCRIPTION = "category_desc"
+        private const val KEY_CATEGORY_ICON_ID = "category_icon_id"
+        private const val KEY_CATEGORY_USER_ID = "category_user_id"
+
+//        private const val TABLE_TASKS = "todo_tasks"
+//        private const val KEY_TASKS_TITLE= "task_titile"
+//        private const val KEY_TASKS_NAME= "task_name"
+//        private const val KEY_TASKS_NAME= "task_name"
+
 
         private const val TABLE_TEMP = "temporary_name"
 
@@ -65,9 +79,20 @@ class TodoDBHelper(context: Context) :
                     + KEY_ID_USER + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + KEY_NAME + " VARCHAR CHECK(length(" + KEY_NAME + ") <= 50) NOT NULL,"
                     + KEY_EMAIL + " VARCHAR UNIQUE NOT NULL," + KEY_PASSWORD + " VARCHAR NOT NULL,"
-                    + KEY_ID_IMAGE + " VARCHAR" + ",FOREIGN KEY" + "(" + KEY_ID_IMAGE + ") REFERENCES " + TABLE_IMAGE + "(" + KEY_ID_IMAGE + ")" + ")"
+                    + KEY_ID_IMAGE + " INTEGER" + ",FOREIGN KEY" + "(" + KEY_ID_IMAGE + ") REFERENCES " + TABLE_IMAGE + "(" + KEY_ID_IMAGE + ")" + ")"
         )
 
+
+        db!!.execSQL(
+            "CREATE TABLE  $TABLE_CATEGORY ($KEY_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "$KEY_CATEGORY_NAME VARCHAR CHECK(length( $KEY_CATEGORY_NAME ) <= 50) NOT NULL,"
+                    + "$KEY_CATEGORY_DESCRIPTION VARCHAR ,"
+                    + "$KEY_CATEGORY_ICON_ID INTEGER,"
+                    + "$KEY_CATEGORY_USER_ID INTEGER,"
+                    + "FOREIGN KEY($KEY_CATEGORY_ICON_ID  ) REFERENCES $TABLE_IMAGE($KEY_ID_IMAGE ),"
+                    + "FOREIGN KEY($KEY_CATEGORY_USER_ID  ) REFERENCES $TABLE_IMAGE($KEY_ID_IMAGE ))"
+
+        )
 
     }
 
@@ -103,13 +128,17 @@ class TodoDBHelper(context: Context) :
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        finally {
+            db.close()
+        }
         return insertedRowId
     }
 
     private fun insertImage(imageBitmap: Bitmap): Long {
         var insertedRowID: Long = -1
+        val db = this.writableDatabase
         try {
-            val db = this.writableDatabase
+
             val stream = ByteArrayOutputStream()
             imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
             val byteArray = stream.toByteArray()
@@ -119,6 +148,9 @@ class TodoDBHelper(context: Context) :
 
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+        finally {
+            db.close()
         }
         return insertedRowID
 
@@ -146,6 +178,9 @@ class TodoDBHelper(context: Context) :
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
+//        finally {
+//            db.close()
+//        }
         return loggedInUserId
 
     }
@@ -195,8 +230,44 @@ class TodoDBHelper(context: Context) :
             e.printStackTrace()
         }
 
+//        finally {
+//            db.close()
+//        }
         return user
 
+    }
+
+    fun createCategory( name:String,description:String,imageBitmap:Bitmap?, userId:Long): Long {
+        var insertedRowId: Long = -1
+        val db = this.writableDatabase
+
+        val values = ContentValues()
+        values.put(KEY_CATEGORY_NAME, name)
+        values.put(KEY_CATEGORY_DESCRIPTION, description)
+        values.put(KEY_CATEGORY_USER_ID, userId)
+
+        if (imageBitmap != null) {
+            val imageId = insertImage(imageBitmap!!)
+            if (imageId.equals(-1)) {
+                return -1 //insert image failed..return
+            }
+            try {
+
+                values.put(KEY_CATEGORY_ICON_ID, imageId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        try {
+            insertedRowId = db.insert(TABLE_CATEGORY, null, values)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+//        finally {
+//            db.close()
+//        }
+        return insertedRowId
     }
 
 }

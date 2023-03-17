@@ -39,18 +39,15 @@ class LoginViewModel(private val repository: TodoRepository) : ViewModel() {
             viewModelScope.launch(Dispatchers.IO) {
 
                 delay(1000)
+
                 val userId=repository.login(email,password)
 
                 if(userId!=-1L)
                 {
-
                     _mutableLiveDataLoginStatus.postValue("success")
-
                 }
-
                 else
                     _mutableLiveDataLoginStatus.postValue("failed")
-
                 _mutableLiveDataIsLoggingIn.postValue(false)
 
             }
