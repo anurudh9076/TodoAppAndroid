@@ -11,6 +11,7 @@ class CustomApplication :Application(){
     companion object{
         lateinit var  sharedPreferences:SharedPreferences
         lateinit var  todoRepository :TodoRepository
+        lateinit var dbHelper:TodoDBHelper
 
     }
 
@@ -19,8 +20,23 @@ class CustomApplication :Application(){
         Log.d("MyTag", "onCreate:application ")
         sharedPreferences=getSharedPreferences(Constants.USER_LOGIN_STATE_PREFERENCE, MODE_PRIVATE)
 
-        val dbHelper = TodoDBHelper.getInstance(this)
+        dbHelper = TodoDBHelper.getInstance(this)
          todoRepository = TodoRepository(dbHelper)
+
+//       val taskId= dbHelper.createTask("do some stuff","You have to complete this",Constants.Priority.TASK_PRIORITY_LOW,null,Constants.Status.NOT_STARTED,null,2)
+//        dbHelper.createTask("do some stuff1","You have to complete this",Constants.Priority.TASK_PRIORITY_LOW,null,Constants.Status.NOT_STARTED,null,2)
+//        dbHelper.createTask("do some stuff2","You have to complete this",Constants.Priority.TASK_PRIORITY_LOW,null,Constants.Status.NOT_STARTED,null,2)
+//        dbHelper.createTask("do some stuff3","You have to complete this",Constants.Priority.TASK_PRIORITY_LOW,null,Constants.Status.NOT_STARTED,null,2)
+//        val task= dbHelper.getTask(taskId)
+//        Log.d("MyTag", "onCreate:task->  "+task.toString())
+
+        val tasksList= dbHelper.fetchAllTasksOfUser(2)
+
+        for(task in tasksList)
+        {
+            Log.e("MyTag", "Task:-> $task")
+        }
+
 
 
     }

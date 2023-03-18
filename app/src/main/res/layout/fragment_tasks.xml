@@ -1,14 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.Fragments.TasksFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_task_horizontal1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.068" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_task_vertical1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.03" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_task_vertical2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.97" />
     <TextView
+        android:id="@+id/tv_all_task"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:textSize="25sp"
+        android:text="@string/all_task"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/gl_task_horizontal1"
+        />
+    <ImageView
+        android:id="@+id/btn_add_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_btn_add_task_24"
+        android:text="Logout"
+        app:layout_constraintTop_toTopOf="@id/tv_all_task"
+        app:layout_constraintBottom_toBottomOf="@id/tv_all_task"
+        app:layout_constraintEnd_toEndOf="parent"/>
+    <View
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Tasks Fragment" />
+        android:layout_height="0.5dp"
+        android:background="#CDC9C9"
+        app:layout_constraintTop_toTopOf="@id/gl_task_horizontal1"
+        app:layout_constraintBottom_toBottomOf="@id/gl_task_horizontal1"
+        app:layout_constraintStart_toStartOf="parent"/>
 
-</FrameLayout>
+
+    <EditText
+
+        android:id="@+id/edt_search_task"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/round_corner_grey_shape"
+        android:hint="Search task"
+
+        android:padding="5dp"
+        app:layout_constraintStart_toStartOf="@id/gl_task_vertical1"
+        app:layout_constraintTop_toBottomOf="@id/gl_task_horizontal1"
+        app:layout_constraintEnd_toStartOf="@id/btn_search_task"
+        >
+    </EditText>
+
+    <ImageView
+        android:id="@+id/btn_search_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_search_24"
+        android:layout_marginRight="5dp"
+        app:layout_constraintEnd_toStartOf="@id/btn_filter_task"
+        app:layout_constraintTop_toTopOf="@id/edt_search_task"
+        app:layout_constraintBottom_toBottomOf="@id/edt_search_task"/>
+    <ImageView
+        android:id="@+id/btn_filter_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_filter_list_24"
+        app:layout_constraintTop_toTopOf="@id/edt_search_task"
+        app:layout_constraintBottom_toBottomOf="@id/edt_search_task"
+        app:layout_constraintEnd_toEndOf="@id/gl_task_vertical2"/>
+    <androidx.recyclerview.widget.RecyclerView
+
+        android:id="@+id/task_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/task_row"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edt_search_task"/>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

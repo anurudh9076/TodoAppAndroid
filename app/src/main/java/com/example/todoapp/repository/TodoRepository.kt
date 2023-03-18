@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.example.todoapp.CustomApplication
 import com.example.todoapp.DbHelper.TodoDBHelper
 import com.example.todoapp.constants.Constants
+import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
 
 class TodoRepository(private val dbHelper: TodoDBHelper) {
@@ -68,6 +69,12 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
         return dbHelper.createCategory(name,description,imageBitmap,userId)
     }
 
+//    fun createTask( title:String,description:String,priority: Constants.Priority,reminderTime:Date, userId:Long): Long
+//    {
+//        return dbHelper.createTask(name,description,imageBitmap,userId)
+//    }
+
+
     private fun createDefaultCategories(userId:Long)
     {
             dbHelper.createCategory("android","android related category",null,userId)
@@ -78,6 +85,10 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
 
     }
 
+    fun fetchTasksOfUser(userId: Long):List<Task> {
+
+        return dbHelper.fetchAllTasksOfUser(userId)
+    }
 
 
 }

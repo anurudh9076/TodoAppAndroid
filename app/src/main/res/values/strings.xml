@@ -9,6 +9,14 @@
     <string name="hint_enter_email">Enter your email</string>
     <string name="hint_enter_password">Enter your password</string>
     <string name="create_an_account">Create an account</string>
+    <string name="create_task">Create  task</string>
+    <string name="title_asterisk">Title*</string>
+    <string name="all_task">All Tasks</string>
+    <string name="search_task">Search tasks</string>
+    <string name="description">Description</string>
+    <string name="select_category">Select a Category </string>
+    <string name="task_priority">Task priority </string>
+    <string name="set_reminder">Set Reminder </string>
 
 
 </resources>

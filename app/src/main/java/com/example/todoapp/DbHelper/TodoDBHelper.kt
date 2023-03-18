@@ -6,18 +6,17 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
+import com.example.todoapp.constants.Constants
+import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
 import java.io.ByteArrayOutputStream
+import java.util.*
+import kotlin.collections.ArrayList
 
 class TodoDBHelper(context: Context) :
-    SQLiteOpenHelper(context, TodoDBHelper.DATABASE_NAME, null, TodoDBHelper.DATABASE_VERSION) {
+    SQLiteOpenHelper(context, DATABASE_NAME, null, TodoDBHelper.DATABASE_VERSION) {
 
-//    private var mDbHelper: TodoDBHelper?
 
-//    init {
-//        mDbHelper = TodoDBHelper(context)
-//    }
 
     companion object {
         private const val TAG = "ToDoDBHelper"
@@ -42,10 +41,14 @@ class TodoDBHelper(context: Context) :
         private const val KEY_CATEGORY_ICON_ID = "category_icon_id"
         private const val KEY_CATEGORY_USER_ID = "category_user_id"
 
-//        private const val TABLE_TASKS = "todo_tasks"
-//        private const val KEY_TASKS_TITLE= "task_titile"
-//        private const val KEY_TASKS_NAME= "task_name"
-//        private const val KEY_TASKS_NAME= "task_name"
+        private const val TABLE_TASKS = "todo_tasks"
+        private const val KEY_TASKS_TITLE = "task_title"
+        private const val KEY_TASKS_DESCRIPTION = "task_desc"
+        private const val KEY_TASKS_PRIORITY = "task_priority"
+        private const val KEY_TASKS_STATUS = "task_status"
+        private const val KEY_TASKS_REMIND_TIME = "task_remind_time"
+        private const val KEY_TASKS_USER_ID = "user_id"
+        private const val KEY_TASKS_IMAGE_ID = "image_id"
 
 
         private const val TABLE_TEMP = "temporary_name"
@@ -79,7 +82,8 @@ class TodoDBHelper(context: Context) :
                     + KEY_ID_USER + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + KEY_NAME + " VARCHAR CHECK(length(" + KEY_NAME + ") <= 50) NOT NULL,"
                     + KEY_EMAIL + " VARCHAR UNIQUE NOT NULL," + KEY_PASSWORD + " VARCHAR NOT NULL,"
-                    + KEY_ID_IMAGE + " INTEGER" + ",FOREIGN KEY" + "(" + KEY_ID_IMAGE + ") REFERENCES " + TABLE_IMAGE + "(" + KEY_ID_IMAGE + ")" + ")"
+                    + KEY_ID_IMAGE + " INTEGER,"
+                    +"FOREIGN KEY" + "(" + KEY_ID_IMAGE + ") REFERENCES " + TABLE_IMAGE + "(" + KEY_ID_IMAGE + ")" + ")"
         )
 
 
@@ -90,10 +94,23 @@ class TodoDBHelper(context: Context) :
                     + "$KEY_CATEGORY_ICON_ID INTEGER,"
                     + "$KEY_CATEGORY_USER_ID INTEGER,"
                     + "FOREIGN KEY($KEY_CATEGORY_ICON_ID  ) REFERENCES $TABLE_IMAGE($KEY_ID_IMAGE ),"
-                    + "FOREIGN KEY($KEY_CATEGORY_USER_ID  ) REFERENCES $TABLE_IMAGE($KEY_ID_IMAGE ))"
+                    + "FOREIGN KEY($KEY_CATEGORY_USER_ID  ) REFERENCES $TABLE_USER($KEY_ID_USER ))"
 
         )
 
+        db!!.execSQL(
+            "CREATE TABLE  $TABLE_TASKS ($KEY_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "$KEY_TASKS_TITLE VARCHAR CHECK(length( $KEY_TASKS_TITLE ) <= 100) NOT NULL,"
+                    + "$KEY_TASKS_DESCRIPTION VARCHAR ,"
+                    + "$KEY_TASKS_PRIORITY INTEGER NOT NULL,"
+                    + "$KEY_TASKS_REMIND_TIME VARCHAR,"
+                    + "$KEY_TASKS_STATUS VARCHAR NOT NULL,"
+                    + "$KEY_TASKS_IMAGE_ID INTEGER,"
+                    + "$KEY_TASKS_USER_ID INTEGER NOT NULL,"
+                    + "FOREIGN KEY($KEY_TASKS_IMAGE_ID  ) REFERENCES $TABLE_IMAGE($KEY_ID_IMAGE ),"
+                    + "FOREIGN KEY($KEY_TASKS_USER_ID  ) REFERENCES $TABLE_USER($KEY_ID_USER ))"
+
+        )
     }
 
 
@@ -108,33 +125,29 @@ class TodoDBHelper(context: Context) :
         val values = ContentValues()
         values.put(KEY_NAME, name)
         values.put(KEY_EMAIL, email.lowercase())
-        values.put(KEY_PASSWORD, password)
 
+        values.put(KEY_PASSWORD, password)
+        var imageId:Long=-1L
         if (image_bitmap != null) {
-            val imageId = insertImage(image_bitmap!!)
+            imageId= insertImage(image_bitmap!!)
             if (imageId.equals(-1)) {
                 return -1 //insert image failed..return
             }
-            try {
 
-                values.put(KEY_ID_IMAGE, imageId)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
+        values.put(KEY_ID_IMAGE, imageId)
+
 
         try {
             insertedRowId = db.insert(TABLE_USER, null, values)
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        finally {
-            db.close()
-        }
+
         return insertedRowId
     }
 
-    private fun insertImage(imageBitmap: Bitmap): Long {
+    fun insertImage(imageBitmap: Bitmap): Long {
         var insertedRowID: Long = -1
         val db = this.writableDatabase
         try {
@@ -149,11 +162,30 @@ class TodoDBHelper(context: Context) :
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        finally {
-            db.close()
-        }
         return insertedRowID
+    }
 
+    /**
+     * return id of inserted image else -1 in case of failure
+     */
+    fun getImage(imageId: Long): Bitmap? {
+        val db = readableDatabase
+        var imageBitmap: Bitmap? = null
+        try {
+            val imageCursor = db.rawQuery(
+                "SELECT * FROM $TABLE_IMAGE WHERE $KEY_ID_IMAGE=$imageId ", null
+            )
+
+            imageCursor.moveToNext()
+            val imageBlob = imageCursor.getBlob(1)
+
+            imageBitmap = BitmapFactory.decodeByteArray(imageBlob, 0, imageBlob.size)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+
+        return imageBitmap
     }
 
     /**
@@ -185,6 +217,9 @@ class TodoDBHelper(context: Context) :
 
     }
 
+    /**
+     * return instance of user with given userID else null in case of failure
+     */
     fun getUser(userId: Long): User? {
 
         var user: User? = null
@@ -204,25 +239,9 @@ class TodoDBHelper(context: Context) :
             val imageId = cursor.getLong(4)
             user = User(loggedInUserId, name, email, imageId, null)
             cursor.close()
+
             if (imageId != -1L) {
-                try {
-                    cursor.close()
-
-                    val imageCursor = db.rawQuery(
-                        "SELECT * FROM $TABLE_IMAGE WHERE $KEY_ID_IMAGE=$imageId ", null
-                    )
-
-                    imageCursor.moveToNext()
-                    val imageBlob = imageCursor.getBlob(1)
-                    imageCursor.close()
-
-                    val imageBitmap = BitmapFactory.decodeByteArray(imageBlob, 0, imageBlob.size)
-                    user.image_bitmap = imageBitmap
-
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                user.image_bitmap = getImage(imageId)
             }
 
 
@@ -230,14 +249,15 @@ class TodoDBHelper(context: Context) :
             e.printStackTrace()
         }
 
-//        finally {
-//            db.close()
-//        }
+
         return user
 
     }
 
-    fun createCategory( name:String,description:String,imageBitmap:Bitmap?, userId:Long): Long {
+    /**
+     * return id of newly created category else -1 in case of failure
+     */
+    fun createCategory(name: String, description: String, imageBitmap: Bitmap?, userId: Long): Long {
         var insertedRowId: Long = -1
         val db = this.writableDatabase
 
@@ -264,10 +284,125 @@ class TodoDBHelper(context: Context) :
         } catch (e: Exception) {
             e.printStackTrace()
         }
-//        finally {
-//            db.close()
-//        }
         return insertedRowId
     }
+
+    /**
+     * return id of newly created task else -1 in case of failure
+     */
+    fun createTask(title: String, description: String?, priority: Constants.Priority, remindTime: Date?,
+                   status: Constants.Status,taskImage:Bitmap? ,userId: Long): Long {
+        var insertedRowId: Long = -1
+        val db = this.writableDatabase
+
+        val values = ContentValues()
+        values.put(KEY_TASKS_TITLE, title)
+        values.put(KEY_TASKS_DESCRIPTION, description)
+        values.put(KEY_TASKS_PRIORITY,priority.id)
+        values.put(KEY_TASKS_REMIND_TIME,remindTime?.time.toString())
+        values.put(KEY_TASKS_STATUS,status.value)
+        values.put(KEY_TASKS_USER_ID, userId)
+
+        var imageId:Long=-1
+        if (taskImage != null) {
+            val imageId = insertImage(taskImage!!)
+            if (imageId == -1L) {
+                return -1L //insert image failed..return
+            }
+        }
+        values.put(KEY_TASKS_IMAGE_ID, imageId)
+
+        try {
+            insertedRowId = db.insert(TABLE_TASKS, null, values)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return insertedRowId
+    }
+
+
+    /**
+     * return instance of Task with given taskId else null in case of failure
+     */
+    fun getTask(taskId: Long): Task? {
+
+        var task: Task? = null
+        val db: SQLiteDatabase = this.readableDatabase
+
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_TASKS WHERE $KEY_ID = $taskId ", null)
+
+        try {
+
+            cursor.moveToNext()
+
+            val taskTitle= cursor.getString(1)
+            val taskDescription= cursor.getString(2)
+            val taskPriority = cursor.getInt(3)
+            val taskRemindTime = cursor.getString(4)
+            val taskStatus=cursor.getString(5)
+            val taskImageId = cursor.getLong(6)
+            val taskUserId=cursor.getLong(7)
+
+            task = Task(taskId, taskTitle, taskDescription, taskPriority , null,
+                taskStatus, taskImageId,null,taskUserId)
+
+            cursor.close()
+
+            if (taskImageId != -1L) {
+                task.imageBitmap = getImage(taskImageId)
+            }
+
+
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+
+        return task
+
+    }
+
+    fun fetchAllTasksOfUser(userId: Long):List<Task> {
+
+        val tasksList=ArrayList<Task>()
+        var task: Task? = null
+        val db: SQLiteDatabase = this.readableDatabase
+
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_TASKS WHERE $KEY_TASKS_USER_ID = $userId ", null)
+
+        try {
+
+            while(cursor.moveToNext())
+            {
+                val taskId=cursor.getLong(0)
+                val taskTitle= cursor.getString(1)
+                val taskDescription= cursor.getString(2)
+                val taskPriority = cursor.getInt(3)
+                val taskRemindTime = cursor.getString(4)
+                val taskStatus=cursor.getString(5)
+                val taskImageId = cursor.getLong(6)
+                val taskUserId=cursor.getLong(7)
+
+                task = Task(taskId, taskTitle, taskDescription, taskPriority , null,
+                    taskStatus, taskImageId,null,taskUserId)
+                if (taskImageId != -1L) {
+                    task.imageBitmap = getImage(taskImageId)
+                }
+                tasksList.add(task)
+
+            }
+
+            cursor.close()
+
+
+
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+
+        return tasksList
+
+
+    }
+
 
 }
