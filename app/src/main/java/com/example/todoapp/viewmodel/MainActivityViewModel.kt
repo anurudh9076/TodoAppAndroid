@@ -1,5 +1,6 @@
 package com.example.todoapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -54,6 +55,18 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
             delay(1000)
             val tasksList = repository.fetchTasksOfUser(userId)
             _mutableLiveDataTasksList.postValue(tasksList)
+
+        }
+
+    }
+
+    fun deleteTask(task: Task) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+
+            val rowsDeleted=repository.deleteTask(task.id)
+            Log.e("MyTAG", "deleteTask:rowsDeleted $rowsDeleted")
+
 
         }
 

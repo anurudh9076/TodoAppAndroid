@@ -18,6 +18,7 @@ import com.example.todoapp.databinding.ActivitySignupBinding
 import com.example.todoapp.repository.TodoRepository
 import com.example.todoapp.viewmodel.SignUpViewModel
 import com.example.todoapp.viewmodel.SignUpViewModelFactory
+import kotlin.math.log
 
 
 class SignupActivity : AppCompatActivity() {
@@ -37,6 +38,10 @@ class SignupActivity : AppCompatActivity() {
                 imageBitmap = bitmap
                 binding.imgViewSignup.setImageBitmap(bitmap)
             }
+        }
+    private val chooseImageFromCameraLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) {
+
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +83,9 @@ class SignupActivity : AppCompatActivity() {
         }
 
         binding.imgViewSignup.setOnClickListener {
+
             chooseImageFromGallery()
+//            chooseImageFromCamera()
         }
         binding.btnCreate.setOnClickListener {
 
@@ -87,8 +94,6 @@ class SignupActivity : AppCompatActivity() {
             val email = binding.edtSignupEmail.text.toString()
             val password = binding.edtSignupPassword.text.toString()
             val confirmPassword = binding.edtSignupConfirmPassword.text.toString()
-
-
 
             signUpViewModel.signUp(name, email, password, confirmPassword, image)
 
@@ -137,6 +142,11 @@ class SignupActivity : AppCompatActivity() {
         intent.type = "image/*"
         intent.action = Intent.ACTION_GET_CONTENT
         chooseImageLauncher.launch(intent)
+    }
+    private fun chooseImageFromCamera() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+//        chooseImageFromCameraLauncher.launch(intent)
     }
 
 

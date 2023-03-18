@@ -14,10 +14,10 @@ object Constants {
     }
 
     enum class Status(val value: String) {
-        COMPLETED("Completed"),
-        STARTED("Started"),
         NOT_STARTED("NotStarted"),
-        CANCELLED("CANCELLED")
+        STARTED("Started"),
+        COMPLETED("Completed"),
+        CANCELLED("Cancelled")
 
 
 

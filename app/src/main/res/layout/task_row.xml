@@ -93,14 +93,14 @@
 <!--        app:layout_constraintTop_toTopOf="@id/tv_task_desc_row"-->
 <!--        app:layout_constraintBottom_toBottomOf="@id/tv_task_desc_row"-->
 <!--        app:layout_constraintEnd_toStartOf="@id/gl_task_row_vertical2"/>-->
-<!--    <ImageView-->
-<!--        android:id="@+id/btn_delete_task"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:src="@drawable/ic_delete_24"-->
-<!--        app:layout_constraintTop_toTopOf="@id/tv_task_category_row"-->
-<!--        app:layout_constraintBottom_toBottomOf="@id/tv_task_category_row"-->
-<!--        app:layout_constraintEnd_toStartOf="@id/gl_task_row_vertical2"/>-->
+    <ImageView
+        android:id="@+id/btn_delete_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_delete_24"
+        app:layout_constraintTop_toTopOf="@id/tv_task_desc_row"
+        app:layout_constraintBottom_toBottomOf="@id/tv_task_desc_row"
+        app:layout_constraintEnd_toStartOf="@id/gl_task_row_vertical2"/>
 
 
 

@@ -1,24 +1,25 @@
 package com.example.todoapp.ui.Fragments
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.DbHelper.TodoDBHelper
-import com.example.todoapp.R
 import com.example.todoapp.adapters.RecyclerTaskAdapter
-import com.example.todoapp.databinding.FragmentDashboardBinding
 import com.example.todoapp.databinding.FragmentTasksBinding
 import com.example.todoapp.models.Task
 import com.example.todoapp.repository.TodoRepository
 import com.example.todoapp.ui.activities.CreateTaskActivity
 import com.example.todoapp.viewmodel.MainActivityViewModel
 import com.example.todoapp.viewmodel.MainActivityViewModelFactory
+
 
 
 class TasksFragment : Fragment() {
@@ -55,6 +56,29 @@ class TasksFragment : Fragment() {
 
             }
 
+            override fun onItemLongCLick(task: Task) {
+                mainActivityViewModel.deleteTask(task)
+            }
+
+            override fun onClickButtonDelete(task: Task) {
+                Log.e("MyTag", "onClickButtonDelete: ", )
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("Delete Task")
+                builder.setMessage("We have a message")
+            //builder.setPositiveButton("OK", DialogInterface.OnClickListener(function = x))
+
+                builder.setPositiveButton("Ok") { dialog, which ->
+                    mainActivityViewModel.deleteTask(task)
+
+                }
+
+                builder.setNegativeButton("Cancel") { dialog, which ->
+
+                }
+                builder.show()
+
+            }
+
         })
         binding.taskRecyclerView.adapter=taskAdapter
         mainActivityViewModel.getLoggedInUser()
@@ -70,6 +94,7 @@ class TasksFragment : Fragment() {
             val intentCreateTask=Intent(requireContext(),CreateTaskActivity::class.java)
             startActivity(intentCreateTask)
         }
+
     }
 
     private fun setObservers() {

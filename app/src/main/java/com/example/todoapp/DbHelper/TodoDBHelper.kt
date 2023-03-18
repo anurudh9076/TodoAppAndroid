@@ -6,12 +6,12 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import com.example.todoapp.constants.Constants
 import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
 import java.io.ByteArrayOutputStream
 import java.util.*
-import kotlin.collections.ArrayList
 
 class TodoDBHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, TodoDBHelper.DATABASE_VERSION) {
@@ -51,7 +51,11 @@ class TodoDBHelper(context: Context) :
         private const val KEY_TASKS_IMAGE_ID = "image_id"
 
 
-        private const val TABLE_TEMP = "temporary_name"
+        private const val TABLE_TASK_CATEGORY_MAPPING = "todo_task_category_mapping"
+        private const val KEY_ID_CATEGORY = "category_id"
+        private const val KEY_ID_TASK = "task_id"
+
+
 
         @Volatile
         private lateinit var instance: TodoDBHelper
@@ -72,14 +76,14 @@ class TodoDBHelper(context: Context) :
 
         db!!.execSQL(
             "CREATE TABLE " + TABLE_IMAGE + "("
-                    + KEY_ID_IMAGE + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + KEY_IMAGE_BLOB + " BLOB " + ")"
         )
 
 
         db!!.execSQL(
             "CREATE TABLE " + TABLE_USER + "("
-                    + KEY_ID_USER + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + KEY_NAME + " VARCHAR CHECK(length(" + KEY_NAME + ") <= 50) NOT NULL,"
                     + KEY_EMAIL + " VARCHAR UNIQUE NOT NULL," + KEY_PASSWORD + " VARCHAR NOT NULL,"
                     + KEY_ID_IMAGE + " INTEGER,"
@@ -94,7 +98,7 @@ class TodoDBHelper(context: Context) :
                     + "$KEY_CATEGORY_ICON_ID INTEGER,"
                     + "$KEY_CATEGORY_USER_ID INTEGER,"
                     + "FOREIGN KEY($KEY_CATEGORY_ICON_ID  ) REFERENCES $TABLE_IMAGE($KEY_ID_IMAGE ),"
-                    + "FOREIGN KEY($KEY_CATEGORY_USER_ID  ) REFERENCES $TABLE_USER($KEY_ID_USER ))"
+                    + "FOREIGN KEY($KEY_CATEGORY_USER_ID  ) REFERENCES $TABLE_USER($KEY_ID_USER ) ON DELETE CASCADE)"
 
         )
 
@@ -108,7 +112,16 @@ class TodoDBHelper(context: Context) :
                     + "$KEY_TASKS_IMAGE_ID INTEGER,"
                     + "$KEY_TASKS_USER_ID INTEGER NOT NULL,"
                     + "FOREIGN KEY($KEY_TASKS_IMAGE_ID  ) REFERENCES $TABLE_IMAGE($KEY_ID_IMAGE ),"
-                    + "FOREIGN KEY($KEY_TASKS_USER_ID  ) REFERENCES $TABLE_USER($KEY_ID_USER ))"
+                    + "FOREIGN KEY($KEY_TASKS_USER_ID  ) REFERENCES $TABLE_USER($KEY_ID_USER ) ON DELETE CASCADE)"
+
+        )
+
+        db!!.execSQL(
+            "CREATE TABLE  $TABLE_TASK_CATEGORY_MAPPING ($KEY_ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "$KEY_ID_TASK INTEGER NOT NULL,"
+                    + "$KEY_ID_CATEGORY INTEGER NOT NULL,"
+                    + "FOREIGN KEY($KEY_ID_TASK  ) REFERENCES $TABLE_TASKS($KEY_ID ) ON DELETE CASCADE,"
+                    + "FOREIGN KEY($KEY_ID_CATEGORY  ) REFERENCES $TABLE_CATEGORY($KEY_ID) ON DELETE CASCADE)"
 
         )
     }
@@ -290,17 +303,17 @@ class TodoDBHelper(context: Context) :
     /**
      * return id of newly created task else -1 in case of failure
      */
-    fun createTask(title: String, description: String?, priority: Constants.Priority, remindTime: Date?,
-                   status: Constants.Status,taskImage:Bitmap? ,userId: Long): Long {
+    fun createTask(title: String, description: String?, priority: String, remindTime: Date?,
+                   status:String,taskImage:Bitmap? ,userId: Long): Long {
         var insertedRowId: Long = -1
         val db = this.writableDatabase
 
         val values = ContentValues()
         values.put(KEY_TASKS_TITLE, title)
         values.put(KEY_TASKS_DESCRIPTION, description)
-        values.put(KEY_TASKS_PRIORITY,priority.id)
+        values.put(KEY_TASKS_PRIORITY,priority)
         values.put(KEY_TASKS_REMIND_TIME,remindTime?.time.toString())
-        values.put(KEY_TASKS_STATUS,status.value)
+        values.put(KEY_TASKS_STATUS,status)
         values.put(KEY_TASKS_USER_ID, userId)
 
         var imageId:Long=-1
@@ -337,11 +350,32 @@ class TodoDBHelper(context: Context) :
 
             val taskTitle= cursor.getString(1)
             val taskDescription= cursor.getString(2)
-            val taskPriority = cursor.getInt(3)
+            val taskPriorityInt= cursor.getInt(3)
             val taskRemindTime = cursor.getString(4)
-            val taskStatus=cursor.getString(5)
+            val taskStatusString=cursor.getString(5)
             val taskImageId = cursor.getLong(6)
             val taskUserId=cursor.getLong(7)
+
+            var taskPriority=Constants.Priority.TASK_PRIORITY_LOW
+
+
+            when(taskPriorityInt)
+            {
+                0->taskPriority=Constants.Priority.TASK_PRIORITY_LOW
+                5->taskPriority=Constants.Priority.TASK_PRIORITY_MEDIUM
+                10->taskPriority=Constants.Priority.TASK_PRIORITY_HIGH
+                15->taskPriority=Constants.Priority.TASK_PRIORITY_CRITICAL
+            }
+
+            var taskStatus=Constants.Status.NOT_STARTED
+
+            when(taskStatusString)
+            {
+                "NotStarted"->Constants.Status.NOT_STARTED
+                "Started"->Constants.Status.STARTED
+                "Completed"->Constants.Status.COMPLETED
+                "Cancelled"->Constants.Status.CANCELLED
+            }
 
             task = Task(taskId, taskTitle, taskDescription, taskPriority , null,
                 taskStatus, taskImageId,null,taskUserId)
@@ -376,11 +410,32 @@ class TodoDBHelper(context: Context) :
                 val taskId=cursor.getLong(0)
                 val taskTitle= cursor.getString(1)
                 val taskDescription= cursor.getString(2)
-                val taskPriority = cursor.getInt(3)
+                val taskPriorityInt = cursor.getInt(3)
                 val taskRemindTime = cursor.getString(4)
-                val taskStatus=cursor.getString(5)
+                val taskStatusString=cursor.getString(5)
                 val taskImageId = cursor.getLong(6)
                 val taskUserId=cursor.getLong(7)
+
+                var taskPriority=Constants.Priority.TASK_PRIORITY_LOW
+
+
+                when(taskPriorityInt)
+                {
+                    0->taskPriority=Constants.Priority.TASK_PRIORITY_LOW
+                    5->taskPriority=Constants.Priority.TASK_PRIORITY_MEDIUM
+                    10->taskPriority=Constants.Priority.TASK_PRIORITY_HIGH
+                    15->taskPriority=Constants.Priority.TASK_PRIORITY_CRITICAL
+                }
+
+                var taskStatus=Constants.Status.NOT_STARTED
+
+                when(taskStatusString)
+                {
+                    "NotStarted"->Constants.Status.NOT_STARTED
+                    "Started"->Constants.Status.STARTED
+                    "Completed"->Constants.Status.COMPLETED
+                    "Cancelled"->Constants.Status.CANCELLED
+                }
 
                 task = Task(taskId, taskTitle, taskDescription, taskPriority , null,
                     taskStatus, taskImageId,null,taskUserId)
@@ -401,7 +456,35 @@ class TodoDBHelper(context: Context) :
 
         return tasksList
 
+    }
 
+    fun createTaskCategoryMapping(taskId:Long,categoryId: Long):Long
+    {
+        var insertedRowId: Long = -1
+        val db = this.writableDatabase
+
+        val values = ContentValues()
+        values.put(KEY_ID_TASK, taskId)
+        values.put(KEY_ID_CATEGORY, categoryId)
+
+
+        try {
+            insertedRowId = db.insert(TABLE_TASKS, null, values)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return insertedRowId
+    }
+
+    fun deleteTask(taskId: Long):Int {
+        try {
+            val database = this.writableDatabase
+            return database.delete(TABLE_TASKS, "$KEY_ID = ?", arrayOf(taskId.toString()))
+
+        } catch (e: java.lang.Exception) {
+           e.printStackTrace()
+        }
+        return -1
     }
 
 

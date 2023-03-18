@@ -4,8 +4,10 @@ import android.graphics.Bitmap
 import com.example.todoapp.CustomApplication
 import com.example.todoapp.DbHelper.TodoDBHelper
 import com.example.todoapp.constants.Constants
+import com.example.todoapp.models.Category
 import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
+import java.util.*
 
 class TodoRepository(private val dbHelper: TodoDBHelper) {
 
@@ -85,9 +87,35 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
 
     }
 
+    fun createTask(title: String, description: String?,listOfCategory:List<Category>,priority: String, remindTime: Date?,
+                   status:String,taskImage:Bitmap? ):Long
+    {
+
+        val pref = CustomApplication.sharedPreferences
+        val userId=pref.getLong(Constants.USER_ID,-1L)
+
+        val  taskId= dbHelper.createTask(title,description,priority, remindTime,status,taskImage,userId)
+
+        for(category in listOfCategory)
+        {
+            if(dbHelper.createTaskCategoryMapping(taskId,category.id)==-1L)
+            {
+                dbHelper.deleteTask(taskId)
+                return -1L
+            }
+        }
+
+        return taskId;
+    }
+
     fun fetchTasksOfUser(userId: Long):List<Task> {
 
         return dbHelper.fetchAllTasksOfUser(userId)
+    }
+
+    fun deleteTask(taskId:Long):Int
+    {
+        return dbHelper.deleteTask(taskId)
     }
 
 

@@ -8,9 +8,9 @@ data class Task(
     var id:Long,
     var title:String,
     var description:String,
-    var priority:Int,
+    var priority:Constants.Priority,
     var reminderTime:Date?,
-    var status:String,
+    var status:Constants.Status,
     var imageId:Long,
     var imageBitmap: Bitmap?,
     var userId:Long
