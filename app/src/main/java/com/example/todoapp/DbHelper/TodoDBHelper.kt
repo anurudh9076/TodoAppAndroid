@@ -6,11 +6,10 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import com.example.todoapp.constants.Constants
 import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
-import java.io.ByteArrayOutputStream
+import java.io.*
 import java.util.*
 
 class TodoDBHelper(context: Context) :
@@ -45,6 +44,7 @@ class TodoDBHelper(context: Context) :
         private const val KEY_TASK_DESCRIPTION = "task_desc"
         private const val KEY_TASK_PRIORITY = "task_priority"
         private const val KEY_TASK_STATUS = "task_status"
+        private const val KEY_TASK_IS_REMINDER_SET = "task_is_reminder_set"
         private const val KEY_TASK_REMIND_TIME = "task_remind_time"
         private const val KEY_TASK_USER_ID = "user_id"
         private const val KEY_TASK_IMAGE_ID = "image_id"
@@ -105,7 +105,8 @@ class TodoDBHelper(context: Context) :
                     + "$KEY_TASK_TITLE VARCHAR CHECK(length( $KEY_TASK_TITLE ) <= 100) NOT NULL,"
                     + "$KEY_TASK_DESCRIPTION VARCHAR ,"
                     + "$KEY_TASK_PRIORITY VARCHAR NOT NULL,"
-                    + "$KEY_TASK_REMIND_TIME VARCHAR,"
+                    + "$KEY_TASK_IS_REMINDER_SET INTEGER NOT NULL,"
+                    + "$KEY_TASK_REMIND_TIME BLOB,"
                     + "$KEY_TASK_STATUS VARCHAR NOT NULL,"
                     + "$KEY_TASK_IMAGE_ID INTEGER,"
                     + "$KEY_TASK_USER_ID INTEGER NOT NULL,"
@@ -307,17 +308,24 @@ class TodoDBHelper(context: Context) :
      * return id of newly created task else -1 in case of failure
      */
     fun createTask(
-        title: String, description: String?, priority: String, remindTime: Date?,
-        status: String, taskImage: Bitmap?, userId: Long
+        title: String,
+        description: String?,
+        priority: String,
+        isReminderSet: Boolean,
+        remindTime: Calendar?,
+        status: String,
+        taskImage: Bitmap?,
+        userId: Long
     ): Long {
         var insertedRowId: Long = -1
         val db = this.writableDatabase
+
 
         val values = ContentValues()
         values.put(KEY_TASK_TITLE, title)
         values.put(KEY_TASK_DESCRIPTION, description)
         values.put(KEY_TASK_PRIORITY, priority)
-        values.put(KEY_TASK_REMIND_TIME, remindTime?.time.toString())
+        values.put(KEY_TASK_IS_REMINDER_SET, if (isReminderSet) 1 else 0)
         values.put(KEY_TASK_STATUS, status)
         values.put(KEY_TASK_USER_ID, userId)
 
@@ -328,6 +336,21 @@ class TodoDBHelper(context: Context) :
                 return -1L //insert image failed..return
             }
         }
+
+        if (isReminderSet && remindTime != null) {
+            try {
+                val outputStream = ByteArrayOutputStream()
+                val oos = ObjectOutputStream(outputStream)
+                oos.writeObject(remindTime)
+                val calendarAsBytes = outputStream.toByteArray()
+                values.put(KEY_TASK_REMIND_TIME, calendarAsBytes)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+
+
+        }
+
         values.put(KEY_TASK_IMAGE_ID, imageId)
 
         try {
@@ -356,18 +379,39 @@ class TodoDBHelper(context: Context) :
             val taskTitle = cursor.getString(1)
             val taskDescription = cursor.getString(2)
             val taskPriority = Constants.Priority from cursor.getString(3)
-            val taskRemindTime = cursor.getString(4)
-            val taskStatus = Constants.Status from cursor.getString(5)
-            val taskImageId = cursor.getLong(6)
-            val taskUserId = cursor.getLong(7)
+            val taskIsReminderSet = cursor.getInt(4)
+            val taskRemindDateTimeBlob = cursor.getBlob(5)
+            val taskStatus = Constants.Status from cursor.getString(6)
+            val taskImageId = cursor.getLong(7)
+            val taskUserId = cursor.getLong(8)
 
+            var remindDateTime: Calendar? = null
 
+            if (taskIsReminderSet == 1) {
 
+                try {
+                    val inoutStream = ByteArrayInputStream(taskRemindDateTimeBlob)
+                    val ois = ObjectInputStream(inoutStream)
+                    remindDateTime = ois.readObject() as Calendar
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: ClassNotFoundException) {
+                    e.printStackTrace()
+                }
+            }
 
 
             task = Task(
-                taskId, taskTitle, taskDescription, taskPriority!!, null,
-                taskStatus!!, taskImageId, null, taskUserId
+                taskId,
+                taskTitle,
+                taskDescription,
+                taskPriority!!,
+                taskIsReminderSet == 1,
+                remindDateTime,
+                taskStatus!!,
+                taskImageId,
+                null,
+                taskUserId
             )
 
             cursor.close()
@@ -401,22 +445,40 @@ class TodoDBHelper(context: Context) :
                 val taskTitle = cursor.getString(1)
                 val taskDescription = cursor.getString(2)
                 val taskPriority = Constants.Priority from cursor.getString(3)
-                val taskRemindTime = cursor.getString(4)
-                val taskStatus = Constants.Status from cursor.getString(5)
-                val taskImageId = cursor.getLong(6)
-                val taskUserId = cursor.getLong(7)
+                val taskIsReminderSet = cursor.getInt(4)
+                val taskRemindDateTimeBlob = cursor.getBlob(5)
+                val taskStatus = Constants.Status from cursor.getString(6)
+                val taskImageId = cursor.getLong(7)
+                val taskUserId = cursor.getLong(8)
+                var imageBitmap: Bitmap? = null
+                var remindDateTime: Calendar? = null
 
-                var imageBitmap:Bitmap?=null
-                if(taskImageId!=-1L)
-                {
-                    imageBitmap=getImage(taskImageId)
+
+                if (taskIsReminderSet == 1) {
+
+                    try {
+                        val inoutStream = ByteArrayInputStream(taskRemindDateTimeBlob)
+                        val ois = ObjectInputStream(inoutStream)
+                        remindDateTime = ois.readObject() as Calendar
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    } catch (e: ClassNotFoundException) {
+                        e.printStackTrace()
+                    }
                 }
 
 
-
                 task = Task(
-                    taskId, taskTitle, taskDescription, taskPriority!!, null,
-                    taskStatus!!, taskImageId, imageBitmap, taskUserId
+                    taskId,
+                    taskTitle,
+                    taskDescription,
+                    taskPriority!!,
+                    taskIsReminderSet == 1,
+                    remindDateTime,
+                    taskStatus!!,
+                    taskImageId,
+                    null,
+                    taskUserId
                 )
                 if (taskImageId != -1L) {
                     task.imageBitmap = getImage(taskImageId)
@@ -466,7 +528,6 @@ class TodoDBHelper(context: Context) :
 
     fun updateTask(task: Task): Int {
 
-
         try {
             val database = this.writableDatabase
             val cv = ContentValues()
@@ -478,18 +539,14 @@ class TodoDBHelper(context: Context) :
             var imageId = -1L
             if (task.imageId == -1L && task.imageBitmap != null) {
 
-                     imageId = insertImage(task.imageBitmap!!)
-                    if (imageId == -1L)
-                        return 0 // image update failed
+                imageId = insertImage(task.imageBitmap!!)
+                if (imageId == -1L)
+                    return 0 // image update failed
 
-            }
-            else if(task.imageId!=-1L)
-            {
-
-                if(deleteImage(imageId =task.imageId)!=0)
-                        imageId=-1
-                if(task.imageBitmap!=null)
-                {
+            } else if (task.imageId != -1L) {
+                if (deleteImage(imageId = task.imageId) != 0)
+                    imageId = -1
+                if (task.imageBitmap != null) {
                     imageId = insertImage(task.imageBitmap!!)
                     if (imageId == -1L)
                         return 0 // image update failed
@@ -505,8 +562,7 @@ class TodoDBHelper(context: Context) :
 
     }
 
-    fun deleteImage(imageId:Long):Int
-    {
+    private fun deleteImage(imageId: Long): Int {
         try {
             val database = this.writableDatabase
             return database.delete(TABLE_IMAGE, "$KEY_ID = ?", arrayOf(imageId.toString()))

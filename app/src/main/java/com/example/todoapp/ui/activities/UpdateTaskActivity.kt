@@ -1,6 +1,9 @@
 package com.example.todoapp.ui.activities
 
 import android.R
+import android.app.DatePickerDialog
+import android.app.Dialog
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -12,10 +15,9 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.drawToBitmap
 import androidx.fragment.app.FragmentActivity
@@ -28,7 +30,9 @@ import com.example.todoapp.models.Task
 import com.example.todoapp.sealedClasses.TaskOperation
 import com.example.todoapp.viewmodel.MainActivityViewModel
 import com.example.todoapp.viewmodel.MainActivityViewModelFactory
+import java.util.*
 import javax.net.ssl.SSLEngineResult.Status
+import kotlin.collections.ArrayList
 
 class UpdateTaskActivity : AppCompatActivity() {
 
@@ -49,8 +53,20 @@ class UpdateTaskActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCreateTaskBinding
     private lateinit var mainActivityViewModel: MainActivityViewModel
     private var imageBitmap: Bitmap? = null
+    private var isReminderSet: Boolean = false
+
     private var task: Task? = null
     private var adapterPosition = -1
+
+
+    private val c = Calendar.getInstance()
+    private val myReminderDateTime = Calendar.getInstance()
+    private var selectedYear = c[Calendar.YEAR]
+    private var selectedMonth = c[Calendar.MONTH]
+    private var selectedDay = c[Calendar.DAY_OF_MONTH]
+    private var selectedHour = c[Calendar.HOUR_OF_DAY]
+    private var selectedMinute = c[Calendar.MINUTE]
+
 
     private val chooseImageLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -77,6 +93,8 @@ class UpdateTaskActivity : AppCompatActivity() {
             imageBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray!!.size)
 
         }
+        isReminderSet=task!!.isReminderSet
+
 
 
         initView() //initialize all the views with given task values
@@ -104,6 +122,21 @@ class UpdateTaskActivity : AppCompatActivity() {
         binding.ivCreateTask.setImageBitmap(imageBitmap)
         binding.edtTaskTitle.setText(task?.title)
         binding.edtTaskDescription.setText(task?.description)
+
+        if(task?.isReminderSet==true && task?.reminderTime!=null)
+        {
+             selectedDay= task?.reminderTime!![Calendar.DAY_OF_MONTH]
+             selectedMonth=task?.reminderTime!![Calendar.MONTH]
+            selectedYear=task?.reminderTime!![Calendar.YEAR]
+            selectedHour=task?.reminderTime!![Calendar.HOUR_OF_DAY]
+            selectedMinute=task?.reminderTime!![Calendar.MINUTE]
+
+            binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear, $selectedHour:${selectedMinute+1}"
+            binding.tvTaskRemindTime.visibility=View.VISIBLE
+            binding.switchSetReminder.isChecked=true
+        }
+
+
         binding.spinnerTaskPriority.setSelection(
             getSpinnerIndex(
                 taskPrioritySpinner,
@@ -167,8 +200,10 @@ class UpdateTaskActivity : AppCompatActivity() {
             val taskDescription = binding.edtTaskDescription.text.toString()
             val taskPriority =
                 Constants.Priority from binding.spinnerTaskPriority.selectedItem.toString()
+            val reminderTime=task?.reminderTime
             val taskStatus = Constants.Status from binding.spinnerTaskStatus.selectedItem.toString()
             val taskImageId = task?.imageId
+
 
             val taskPriorityEnum = Constants.Priority.values()
             val newTask = Task(
@@ -176,7 +211,8 @@ class UpdateTaskActivity : AppCompatActivity() {
                 taskTitle,
                 taskDescription,
                 taskPriority!!,
-                task!!.reminderTime,
+                isReminderSet,
+                myReminderDateTime,
                 taskStatus!!,
                 taskImageId!!,
                 imageBitmap,
@@ -186,6 +222,33 @@ class UpdateTaskActivity : AppCompatActivity() {
             mainActivityViewModel.updateTask(newTask, adapterPosition)
 
 
+        }
+
+
+        binding.switchSetReminder.setOnCheckedChangeListener { buttonView, isChecked ->
+            val switchSetReminder = buttonView as SwitchCompat
+            if (isChecked) {
+                isReminderSet = true
+                binding.tvTaskRemindTime.visibility = View.VISIBLE
+
+                val c = Calendar.getInstance(TimeZone.getTimeZone("IST"))
+
+                selectedYear = c[Calendar.YEAR]
+                selectedMonth = c[Calendar.MONTH]
+                selectedDay = c[Calendar.DAY_OF_MONTH]
+                selectedHour = c[Calendar.HOUR_OF_DAY]
+                selectedMinute = c[Calendar.MINUTE]
+
+                binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear, $selectedHour:${selectedMinute+1}"
+                myReminderDateTime.set(selectedYear,selectedMonth,selectedDay,selectedHour,selectedMinute)
+
+            } else {
+                isReminderSet = false
+                binding.tvTaskRemindTime.visibility = View.INVISIBLE
+            }
+        }
+        binding.tvTaskRemindTime.setOnClickListener {
+            chooseDateTime()
         }
 
 
@@ -235,6 +298,64 @@ class UpdateTaskActivity : AppCompatActivity() {
         }
 
         return 0;
+    }
+
+
+    private fun chooseDateTime() {
+        val selectDateTimeDialog = Dialog(this)
+        selectDateTimeDialog.setContentView(com.example.todoapp.R.layout.item_date_time_input)
+
+        val btnSelectDate = selectDateTimeDialog.findViewById<Button>(com.example.todoapp.R.id.btn_date_picker)
+        val btnSelectTime = selectDateTimeDialog.findViewById<TextView>(com.example.todoapp.R.id.btn_time_picker)
+        val tvDate = selectDateTimeDialog.findViewById<TextView>(com.example.todoapp.R.id.tv_date)
+        val tvTime = selectDateTimeDialog.findViewById<TextView>(com.example.todoapp.R.id.tv_time)
+        val btnOk = selectDateTimeDialog.findViewById<Button>(com.example.todoapp.R.id.btn_select_data_time_ok)
+
+        tvDate.text="$selectedDay-${selectedMonth+1}-$selectedYear"
+        tvTime.text="$selectedHour:$selectedMinute"
+
+
+        btnSelectDate.setOnClickListener {
+
+            // Get Current Date
+
+            val datePickerDialog = DatePickerDialog(
+                this,
+                { view, year, monthOfYear, dayOfMonth ->
+
+                    tvDate.text = dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year
+                    selectedDay = dayOfMonth
+                    selectedYear = year
+                    selectedMonth = monthOfYear
+                }, selectedYear, selectedMonth, selectedDay
+            )
+            datePickerDialog.show()
+
+        }
+
+        btnSelectTime.setOnClickListener {
+
+            val timePickerDialog = TimePickerDialog(
+                this,
+                { view, hourOfDay, minute ->
+                    tvTime.text = "$hourOfDay:$minute"
+                    selectedMinute = minute
+                    selectedHour = hourOfDay
+                },selectedHour, selectedMinute, true
+            )
+            timePickerDialog.show()
+
+        }
+        btnOk.setOnClickListener {
+
+            myReminderDateTime.set(selectedYear,selectedMonth,selectedDay,selectedHour,selectedMinute)
+            binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear, $selectedHour:$selectedMinute"
+            Log.e(TAG, "choosenDateTime: $myReminderDateTime" )
+            selectDateTimeDialog.dismiss()
+        }
+
+        selectDateTimeDialog.show()
+
     }
 
 

@@ -69,7 +69,7 @@ class RecyclerTaskAdapter(val context: Context, var arrayList: ArrayList<Task>) 
 
             when(task.status)
             {
-                Constants.Status.NOT_STARTED ->{}
+                Constants.Status.NOT_STARTED ->{textViewTaskCategory.setTextColor(Color.GRAY)}
                 Constants.Status.STARTED -> textViewTaskCategory.setTextColor(Color.BLUE)
                 Constants.Status.COMPLETED -> textViewTaskCategory.setTextColor(Color.GREEN)
                 Constants.Status.CANCELLED -> textViewTaskCategory.setTextColor(Color.RED)

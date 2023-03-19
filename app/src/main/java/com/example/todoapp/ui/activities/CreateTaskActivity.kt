@@ -50,13 +50,13 @@ class CreateTaskActivity : AppCompatActivity() {
 
 
 
-    val c = Calendar.getInstance()
-    val myReminderDateTime = Calendar.getInstance()
-    var selectedYear = c[Calendar.YEAR]
-    var selectedMonth = c[Calendar.MONTH]
-    var selectedDay = c[Calendar.DAY_OF_MONTH]
-    var selectedHour = c[Calendar.HOUR_OF_DAY]
-    var selectedMinute = c[Calendar.MINUTE]
+    private val c = Calendar.getInstance()
+    private val myReminderDateTime = Calendar.getInstance()
+    private var selectedYear = c[Calendar.YEAR]
+    private var selectedMonth = c[Calendar.MONTH]
+    private var selectedDay = c[Calendar.DAY_OF_MONTH]
+    private var selectedHour = c[Calendar.HOUR_OF_DAY]
+    private var selectedMinute = c[Calendar.MINUTE]
 
     private val chooseImageLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -104,7 +104,7 @@ class CreateTaskActivity : AppCompatActivity() {
             if(isReminderSet)
             {
                 mainActivityViewModel.createTask(
-                    taskTitle, taskDescription, priorityList, taskPriority, null,
+                    taskTitle, taskDescription, priorityList, taskPriority, isReminderSet,myReminderDateTime,
                     Constants.Status.NOT_STARTED.value, imageBitmap
                 )
                 Log.e(TAG, "isremider set: $myReminderDateTime" )
@@ -112,7 +112,7 @@ class CreateTaskActivity : AppCompatActivity() {
             else
             {
                 mainActivityViewModel.createTask(
-                    taskTitle, taskDescription, priorityList, taskPriority, null,
+                    taskTitle, taskDescription, priorityList, taskPriority, false,null,
                     Constants.Status.NOT_STARTED.value, imageBitmap
                 )
 
@@ -200,7 +200,7 @@ class CreateTaskActivity : AppCompatActivity() {
         taskPrioritySpinner.adapter = adapter
     }
 
-    fun chooseDateTime() {
+   private fun chooseDateTime() {
         val selectDateTimeDialog = Dialog(this)
         selectDateTimeDialog.setContentView(R.layout.item_date_time_input)
 
@@ -212,9 +212,6 @@ class CreateTaskActivity : AppCompatActivity() {
 
         tvDate.text="$selectedDay-${selectedMonth+1}-$selectedYear"
         tvTime.text="$selectedHour:$selectedMinute"
-
-
-
 
 
         btnSelectDate.setOnClickListener {
@@ -235,10 +232,8 @@ class CreateTaskActivity : AppCompatActivity() {
 
         }
 
-
         btnSelectTime.setOnClickListener {
 
-            // Launch Time Picker Dialog
             val timePickerDialog = TimePickerDialog(
                 this,
                 { view, hourOfDay, minute ->
@@ -248,7 +243,6 @@ class CreateTaskActivity : AppCompatActivity() {
                 },selectedHour, selectedMinute, true
             )
             timePickerDialog.show()
-
 
         }
         btnOk.setOnClickListener {

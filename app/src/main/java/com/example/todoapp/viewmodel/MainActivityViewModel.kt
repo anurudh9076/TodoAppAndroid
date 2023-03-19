@@ -126,7 +126,8 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
         description: String,
         listOfCategory: List<Category>,
         priority: String,
-        remindTime: Date?,
+        isReminderSet:Boolean,
+        remindTime: Calendar?,
         status: String,
         taskImage: Bitmap?
     ) {
@@ -150,6 +151,7 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
                 description,
                 listOfCategory,
                 priority,
+                isReminderSet,
                 remindTime,
                 status,
                 taskImage

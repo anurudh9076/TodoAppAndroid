@@ -88,7 +88,7 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
 
     }
 
-    fun createTask(title: String, description: String?,listOfCategory:List<Category>,priority: String, remindTime: Date?,
+    fun createTask(title: String, description: String?,listOfCategory:List<Category>,priority: String, isReminderSet:Boolean,remindTime: Calendar?,
                    status:String,taskImage:Bitmap? ):Long
     {
 
@@ -100,7 +100,7 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
                 return -1L
         }
 
-        val  taskId= dbHelper.createTask(title,description,priority, remindTime,status,taskImage,userId)
+        val  taskId= dbHelper.createTask(title,description,priority, isReminderSet,remindTime,status,taskImage,userId)
 
         for(category in listOfCategory)
         {
