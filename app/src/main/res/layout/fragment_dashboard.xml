@@ -6,6 +6,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.Fragments.DashboardFragment">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_dashboard_horizontal1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.068" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_dashboard_horizontal2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.55" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_dashboard_horizontal3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.068" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl_dashboard_vertical1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.03" />
+
     <androidx.cardview.widget.CardView
         android:layout_width="80dp"
         android:layout_height="80dp"
@@ -20,7 +45,7 @@
         android:layout_height="80dp"
         android:layout_width="match_parent"
         android:id="@+id/iv_user_dashboard"
-
+        android:contentDescription="@string/user_image_description"
         android:scaleType="centerCrop"/>
 
     </androidx.cardview.widget.CardView>
@@ -41,18 +66,69 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Logout"
+        android:text="@string/logout"
         app:layout_constraintTop_toTopOf="@id/tv_user_name_greet"
         app:layout_constraintBottom_toBottomOf="@id/tv_user_name_greet"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <View
+        android:id="@+id/dashboard_view_1"
         android:layout_width="match_parent"
         android:layout_margin="5dp"
         android:layout_height="0.5dp"
         android:background="#CDC9C9"
         app:layout_constraintTop_toBottomOf="@id/cv_image_user_dashboard"
         app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_dashboard_your_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/your_tasks"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/gl_dashboard_vertical1"
+        app:layout_constraintTop_toBottomOf="@+id/dashboard_view_1"
+        android:layout_marginTop="10dp"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_dashboard_your_task"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        tools:listitem="@layout/task_row"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toBottomOf="@id/tv_dashboard_your_task"
+        app:layout_constraintBottom_toBottomOf="@id/gl_dashboard_horizontal2"
+     app:layout_constraintStart_toStartOf="parent"/>
+
+    <View
+        android:id="@+id/dashboard_view_2"
+        android:layout_width="match_parent"
+        android:layout_margin="5dp"
+        android:layout_height="0.5dp"
+        android:background="#B1AFAF"
+        app:layout_constraintTop_toBottomOf="@id/recycler_dashboard_your_task"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_dashboard_completed_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/completed_tasks"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/gl_dashboard_vertical1"
+        app:layout_constraintTop_toBottomOf="@+id/gl_dashboard_horizontal2"
+        android:layout_marginTop="10dp"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_dashboard_completed_task"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/task_row"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toBottomOf="@id/tv_dashboard_completed_task"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+
 
 
 

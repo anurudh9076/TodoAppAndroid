@@ -1,6 +1,7 @@
 package com.example.todoapp.adapters
 
 import android.content.Context
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,13 +11,14 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
+import com.example.todoapp.constants.Constants
 import com.example.todoapp.models.Task
 
-class RecyclerTaskAdapter(val context: Context, val arrayList: ArrayList<Task>) :
+class RecyclerTaskAdapter(val context: Context, var arrayList: ArrayList<Task>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var onItemClickListener: OnItemClickListener? = null
 
+    private var onItemClickListener: OnItemClickListener? = null
     fun set(onItemClickListener: OnItemClickListener) {
         this.onItemClickListener = onItemClickListener
     }
@@ -63,28 +65,41 @@ class RecyclerTaskAdapter(val context: Context, val arrayList: ArrayList<Task>) 
         fun bind(task: Task) {
             textViewTaskName.text = task.title
             textViewTaskDescription.text = task.description
-            textViewTaskCategory.text = task.title
+            textViewTaskCategory.text = task.status.value
+
+            when(task.status)
+            {
+                Constants.Status.NOT_STARTED ->{}
+                Constants.Status.STARTED -> textViewTaskCategory.setTextColor(Color.BLUE)
+                Constants.Status.COMPLETED -> textViewTaskCategory.setTextColor(Color.GREEN)
+                Constants.Status.CANCELLED -> textViewTaskCategory.setTextColor(Color.RED)
+            }
+
+
 
             if (task.imageBitmap != null)
                 imageViewTaskImage.setImageBitmap(task.imageBitmap)
+            else
+                imageViewTaskImage.setImageResource(R.drawable.icon_task_default1)
 
             taskRow.setOnClickListener {
-                if (adapterPosition > 0) {
-                    onItemClickListener?.onItemClick(task)
+                if (adapterPosition >=0) {
+                    onItemClickListener?.onItemClick(task,adapterPosition)
+
                 }
 //                Log.e("MyTag", "Clicked on task ")
             }
 
             taskRow.setOnLongClickListener {
 
-                if (adapterPosition > 0) {
-                    onItemClickListener?.onItemClick(task)
+                if (adapterPosition >= 0) {
+                    onItemClickListener?.onItemLongCLick(task)
                 }
                 true
             }
             buttonDeleteTask.setOnClickListener {
-                if (adapterPosition > 0) {
-                    onItemClickListener?.onClickButtonDelete(task)
+                if (adapterPosition >=0) {
+                    onItemClickListener?.onClickButtonDelete(task,adapterPosition)
                 }
             }
 
@@ -95,9 +110,9 @@ class RecyclerTaskAdapter(val context: Context, val arrayList: ArrayList<Task>) 
     }
 
     interface OnItemClickListener {
-        fun onItemClick(task: Task)
+        fun onItemClick(task: Task,position: Int)
         fun onItemLongCLick(task: Task)
 
-        fun onClickButtonDelete(task:Task)
+        fun onClickButtonDelete(task:Task,position: Int)
     }
 }

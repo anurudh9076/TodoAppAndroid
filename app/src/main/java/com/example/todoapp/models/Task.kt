@@ -2,6 +2,7 @@ package com.example.todoapp.models
 
 import android.graphics.Bitmap
 import com.example.todoapp.constants.Constants
+import java.util.Calendar
 import java.util.Date
 
 data class Task(
@@ -9,12 +10,13 @@ data class Task(
     var title:String,
     var description:String,
     var priority:Constants.Priority,
-    var reminderTime:Date?,
+//    val isReminderSet:Boolean,
+    var reminderTime:Calendar?,
     var status:Constants.Status,
     var imageId:Long,
     var imageBitmap: Bitmap?,
     var userId:Long
 
-) {
+):java.io.Serializable {
 
 }

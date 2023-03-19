@@ -1,6 +1,7 @@
 package com.example.todoapp.viewmodel
 
 import android.app.ActivityManager.TaskDescription
+import android.graphics.Bitmap
 import android.icu.text.CaseMap.Title
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,17 +22,19 @@ class CreateTaskViewModel: ViewModel() {
     val liveDataShowProcessBar: LiveData<Boolean>
         get()=_mutableLiveDataShowProgressBar
 
-    fun createTask(title:String,description: String,categoryList:List<Category>,priority: String,remindTime:Date)
+    fun createTask(title: String, description: String,listOfCategory:List<Category>,priority: String, remindTime: Date?,
+                   status:String,taskImage: Bitmap? )
     {
 
         _mutableLiveDataShowProgressBar.postValue(true)
+
         viewModelScope.launch(Dispatchers.IO) {
 
 
+            delay(1000)
 
-//            delay(1000)
-//            repository.createTask(title,description,categoryList,priority,remindTime)
-//            _mutableLiveDataShowProgressBar.postValue(false)
+            repository.createTask(title,description,listOfCategory,priority,remindTime, status, taskImage)
+            _mutableLiveDataShowProgressBar.postValue(false)
         }
 
 

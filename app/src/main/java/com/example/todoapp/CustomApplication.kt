@@ -3,15 +3,21 @@ package com.example.todoapp
 import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.lifecycle.ViewModelProvider
 import com.example.todoapp.DbHelper.TodoDBHelper
 import com.example.todoapp.constants.Constants
+import com.example.todoapp.models.User
 import com.example.todoapp.repository.TodoRepository
+import com.example.todoapp.viewmodel.MainActivityViewModel
+import com.example.todoapp.viewmodel.MainActivityViewModelFactory
 
 class CustomApplication :Application(){
     companion object{
         lateinit var  sharedPreferences:SharedPreferences
         lateinit var  todoRepository :TodoRepository
+        lateinit var mainActivityViewModel: MainActivityViewModel
         lateinit var dbHelper:TodoDBHelper
+        var loggedInUser: User?=null
 
     }
 
@@ -23,29 +29,9 @@ class CustomApplication :Application(){
         dbHelper = TodoDBHelper.getInstance(this)
          todoRepository = TodoRepository(dbHelper)
 
-//       val taskId= dbHelper.createTask("do some stuff","You have to complete this",Constants.Priority.TASK_PRIORITY_LOW,null,Constants.Status.NOT_STARTED,null,2)
-//        dbHelper.createTask("do some stuff1","You have to complete this",Constants.Priority.TASK_PRIORITY_LOW,null,Constants.Status.NOT_STARTED,null,2)
-//        dbHelper.createTask("do some stuff2","You have to complete this",Constants.Priority.TASK_PRIORITY_LOW,null,Constants.Status.NOT_STARTED,null,2)
-//        dbHelper.createTask("do some stuff3","You have to complete this",Constants.Priority.TASK_PRIORITY_LOW.priority,null,Constants.Status.NOT_STARTED.value,null,2)
-//        val task= dbHelper.getTask(taskId)
-//        Log.d("MyTag", "onCreate:task->  "+task.toString())
+        loggedInUser= todoRepository.getLoggedInUser()
 
-        val tasksList= dbHelper.fetchAllTasksOfUser(2)
 
-        for(task in tasksList)
-        {
-            Log.e("MyTag", "Task:-> $task")
-        }
-
-//        dbHelper.deleteTask(4)
-//
-//
-//        val tasksList1= dbHelper.fetchAllTasksOfUser(2)
-//
-//        for(task in tasksList1)
-//        {
-//            Log.e("MyTag", "Task:-> $task")
-//        }
 
 
     }

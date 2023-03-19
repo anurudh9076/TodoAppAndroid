@@ -8,6 +8,7 @@ import com.example.todoapp.models.Category
 import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
 import java.util.*
+import kotlin.collections.ArrayList
 
 class TodoRepository(private val dbHelper: TodoDBHelper) {
 
@@ -94,6 +95,11 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
         val pref = CustomApplication.sharedPreferences
         val userId=pref.getLong(Constants.USER_ID,-1L)
 
+        if(userId==-1L)
+        {
+                return -1L
+        }
+
         val  taskId= dbHelper.createTask(title,description,priority, remindTime,status,taskImage,userId)
 
         for(category in listOfCategory)
@@ -107,8 +113,12 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
 
         return taskId;
     }
+    fun getTask(taskId: Long): Task?
+    {
+        return  dbHelper.getTask(taskId)
+    }
 
-    fun fetchTasksOfUser(userId: Long):List<Task> {
+    fun fetchTasksOfUser(userId: Long):ArrayList<Task> {
 
         return dbHelper.fetchAllTasksOfUser(userId)
     }
@@ -116,6 +126,10 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
     fun deleteTask(taskId:Long):Int
     {
         return dbHelper.deleteTask(taskId)
+    }
+
+    fun updateTask(task:Task): Int {
+            return dbHelper.updateTask(task)
     }
 
 
