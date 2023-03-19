@@ -51,10 +51,23 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
         android:textStyle="bold"
-        android:text="name"
+        android:text="@string/name"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/cv_image_task_row"
         app:layout_constraintBottom_toTopOf="@id/tv_task_desc_row"
+        />
+    <TextView
+        android:id="@+id/tv_task_reminder_time_row"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:visibility="gone"
+        android:layout_marginTop="10dp"
+        android:textStyle="bold"
+        android:text="@string/name"
+        app:layout_constraintTop_toTopOf="@id/tv_task_name_row"
+        app:layout_constraintEnd_toEndOf="@id/gl_task_row_vertical2"
+        app:layout_constraintBottom_toBottomOf="@id/tv_task_name_row"
         />
     <TextView
         android:id="@+id/tv_task_desc_row"

@@ -1,6 +1,7 @@
 package com.example.todoapp.constants
 
 object Constants {
+    const val REMINDERS="Reminders"
     const val IMAGE_BITMAP="image_bitmap"
     const val IMAGE_BYTE_ARRAY="image_byte_array"
     const val ADAPTER_POSITION ="adapter_position"

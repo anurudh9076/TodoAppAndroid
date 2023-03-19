@@ -535,6 +535,19 @@ class TodoDBHelper(context: Context) :
             cv.put(KEY_TASK_DESCRIPTION, task.description)
             cv.put(KEY_TASK_STATUS, task.status.value)
             cv.put(KEY_TASK_PRIORITY, task.priority.priority)
+            cv.put(KEY_TASK_IS_REMINDER_SET,task.isReminderSet)
+
+            if (task.isReminderSet && task.reminderTime != null) {
+                try {
+                    val outputStream = ByteArrayOutputStream()
+                    val oos = ObjectOutputStream(outputStream)
+                    oos.writeObject(task.reminderTime)
+                    val calendarAsBytes = outputStream.toByteArray()
+                    cv.put(KEY_TASK_REMIND_TIME, calendarAsBytes)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
 
             var imageId = -1L
             if (task.imageId == -1L && task.imageBitmap != null) {
