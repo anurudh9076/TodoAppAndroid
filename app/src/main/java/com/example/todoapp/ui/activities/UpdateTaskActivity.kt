@@ -59,8 +59,8 @@ class UpdateTaskActivity : AppCompatActivity() {
     private var adapterPosition = -1
 
 
-    private val c = Calendar.getInstance()
-    private val myReminderDateTime = Calendar.getInstance()
+    private val c = Calendar.getInstance(TimeZone.getTimeZone("IST"))
+    private val myReminderDateTime = Calendar.getInstance(TimeZone.getTimeZone("IST"))
     private var selectedYear = c[Calendar.YEAR]
     private var selectedMonth = c[Calendar.MONTH]
     private var selectedDay = c[Calendar.DAY_OF_MONTH]
@@ -131,7 +131,7 @@ class UpdateTaskActivity : AppCompatActivity() {
             selectedHour=task?.reminderTime!![Calendar.HOUR_OF_DAY]
             selectedMinute=task?.reminderTime!![Calendar.MINUTE]
 
-            binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear, $selectedHour:${selectedMinute+1}"
+            binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear | $selectedHour:${selectedMinute+1}"
             binding.tvTaskRemindTime.visibility=View.VISIBLE
             binding.switchSetReminder.isChecked=true
         }
@@ -239,7 +239,7 @@ class UpdateTaskActivity : AppCompatActivity() {
                 selectedHour = c[Calendar.HOUR_OF_DAY]
                 selectedMinute = c[Calendar.MINUTE]
 
-                binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear, $selectedHour:${selectedMinute+1}"
+                binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear | $selectedHour:${selectedMinute+1}"
                 myReminderDateTime.set(selectedYear,selectedMonth,selectedDay,selectedHour,selectedMinute)
 
             } else {
@@ -349,7 +349,7 @@ class UpdateTaskActivity : AppCompatActivity() {
         btnOk.setOnClickListener {
 
             myReminderDateTime.set(selectedYear,selectedMonth,selectedDay,selectedHour,selectedMinute)
-            binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear, $selectedHour:$selectedMinute"
+            binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear | $selectedHour:$selectedMinute"
             Log.e(TAG, "choosenDateTime: $myReminderDateTime" )
             selectDateTimeDialog.dismiss()
         }

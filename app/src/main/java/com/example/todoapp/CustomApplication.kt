@@ -32,8 +32,6 @@ class CustomApplication :Application(){
         loggedInUser= todoRepository.getLoggedInUser()
 
 
-
-
     }
 
 

@@ -17,15 +17,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.CustomApplication
 import com.example.todoapp.R
+import com.example.todoapp.adapters.RecyclerCategoryAdapter
 import com.example.todoapp.constants.Constants
 import com.example.todoapp.databinding.ActivityCreateTaskBinding
+import com.example.todoapp.databinding.BottomSheetAddCategoryBinding
 import com.example.todoapp.models.Category
 import com.example.todoapp.sealedClasses.TaskOperation
 import com.example.todoapp.viewmodel.MainActivityViewModel
 import com.example.todoapp.viewmodel.MainActivityViewModelFactory
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class CreateTaskActivity : AppCompatActivity() {
@@ -50,8 +55,8 @@ class CreateTaskActivity : AppCompatActivity() {
 
 
 
-    private val c = Calendar.getInstance()
-    private val myReminderDateTime = Calendar.getInstance()
+    private val c = Calendar.getInstance(TimeZone.getTimeZone("IST"))
+    private val myReminderDateTime = Calendar.getInstance(TimeZone.getTimeZone("IST"))
     private var selectedYear = c[Calendar.YEAR]
     private var selectedMonth = c[Calendar.MONTH]
     private var selectedDay = c[Calendar.DAY_OF_MONTH]
@@ -104,7 +109,7 @@ class CreateTaskActivity : AppCompatActivity() {
             if(isReminderSet)
             {
                 mainActivityViewModel.createTask(
-                    taskTitle, taskDescription, priorityList, taskPriority, isReminderSet,myReminderDateTime,
+                    taskTitle, taskDescription, priorityList, taskPriority, true,myReminderDateTime,
                     Constants.Status.NOT_STARTED.value, imageBitmap
                 )
                 Log.e(TAG, "isremider set: $myReminderDateTime" )
@@ -136,7 +141,7 @@ class CreateTaskActivity : AppCompatActivity() {
                  selectedHour = c[Calendar.HOUR_OF_DAY]
                  selectedMinute = c[Calendar.MINUTE]
 
-                binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear, $selectedHour:${selectedMinute+1}"
+                binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear | $selectedHour:${selectedMinute+1}"
                 myReminderDateTime.set(selectedYear,selectedMonth,selectedDay,selectedHour,selectedMinute)
 
             } else {
@@ -146,6 +151,10 @@ class CreateTaskActivity : AppCompatActivity() {
         }
         binding.tvTaskRemindTime.setOnClickListener {
             chooseDateTime()
+        }
+
+        binding.btnSelectCategory.setOnClickListener{
+            showBottomSheetDialog()
         }
 
     }
@@ -248,13 +257,50 @@ class CreateTaskActivity : AppCompatActivity() {
         btnOk.setOnClickListener {
 
             myReminderDateTime.set(selectedYear,selectedMonth,selectedDay,selectedHour,selectedMinute)
-            binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear, $selectedHour:$selectedMinute"
+            binding.tvTaskRemindTime.text="$selectedDay-${selectedMonth+1}-$selectedYear | $selectedHour:$selectedMinute"
             Log.e(TAG, "choosenDateTime: $myReminderDateTime" )
             selectDateTimeDialog.dismiss()
         }
 
         selectDateTimeDialog.show()
+    }
 
+    private fun showBottomSheetDialog() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+//        val binding1=BottomSheetAddCategoryBinding.inflate(layoutInflater)
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_add_category)
+        val recyclerCategory = bottomSheetDialog.findViewById<RecyclerView>(R.id.recycler_add_category_bottom_sheet)
+        val btnSelectCategories = bottomSheetDialog.findViewById<Button>(R.id.btn_select_categories_bottom_sheet)
+        val btnAddNew = bottomSheetDialog.findViewById<Button>(R.id.btn_create_new_category_bottom_sheet)
+
+        val categoryList=ArrayList<Category>()
+        categoryList.add(Category(0,"android","something",-1,null,1))
+        categoryList.add(Category(0,"backend","something",-1,null,1))
+        categoryList.add(Category(0,"data","something1",-1,null,1))
+        categoryList.add(Category(0,"desktop","something2",-1,null,1))
+        categoryList.add(Category(0,"android","something",-1,null,1))
+        categoryList.add(Category(0,"backend","something",-1,null,1))
+        categoryList.add(Category(0,"data","something1",-1,null,1))
+        categoryList.add(Category(0,"desktop","something2",-1,null,1))
+        categoryList.add(Category(0,"android","something",-1,null,1))
+        categoryList.add(Category(0,"backend","something",-1,null,1))
+        categoryList.add(Category(0,"data","something1",-1,null,1))
+        categoryList.add(Category(0,"desktop","something2",-1,null,1))
+        categoryList.add(Category(0,"desktop","something2",-1,null,1))
+        categoryList.add(Category(0,"android","something",-1,null,1))
+        categoryList.add(Category(0,"backend","something",-1,null,1))
+        categoryList.add(Category(0,"data","something1",-1,null,1))
+        categoryList.add(Category(0,"desktop","something2",-1,null,1))
+        categoryList.add(Category(0,"android","something",-1,null,1))
+        categoryList.add(Category(0,"backend","something",-1,null,1))
+        categoryList.add(Category(0,"data","something1",-1,null,1))
+        categoryList.add(Category(0,"desktop","something2",-1,null,1))
+
+        val categoryAdapter=RecyclerCategoryAdapter(this,categoryList)
+        recyclerCategory?.adapter=categoryAdapter
+//        binding1.recyclerAddCategoryBottomSheet.adapter=categoryAdapter
+
+        bottomSheetDialog.show()
     }
 
 }

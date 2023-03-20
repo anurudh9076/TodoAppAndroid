@@ -6,17 +6,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todoapp.CustomApplication
 import com.example.todoapp.models.Category
 import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
 import com.example.todoapp.repository.TodoRepository
 import com.example.todoapp.sealedClasses.TaskOperation
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivityViewModel(private val repository: TodoRepository) : ViewModel() {
+
+    private  val TAG = "MyTag"
 
     private val _mutableLiveDataLoggedInUser = MutableLiveData<User>()
     val liveDataLoggedInUser: LiveData<User>
@@ -43,6 +48,13 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
     val liveDataTemp: LiveData<List<Task>>
         get() = _mutableLiveDataTemp
 
+    private var tasksList=ArrayList<Task>()
+
+    init {
+
+        if(CustomApplication.loggedInUser!=null)
+            fetchTasksOfUser(CustomApplication.loggedInUser!!.id)
+    }
     fun getLoggedInUser() {
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -66,14 +78,9 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
 
     fun fetchTasksOfUser(userId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-
-//            delay(1000)
-            val tasksList = repository.fetchTasksOfUser(userId)
-//            _mutableLiveDataTasksList.postValue(tasksList)
+            Log.e(TAG, "fetchTasksOfUser: " )
+            tasksList= repository.fetchTasksOfUser(userId)
             _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
-
-            delay(1000)
-            _mutableLiveDataTaskOperation.postValue(TaskOperation.onNullOperation("done"))
         }
 
     }
@@ -94,7 +101,7 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
             }
 
             delay(1000)
-            _mutableLiveDataTaskOperation.postValue(TaskOperation.onNullOperation("null"))
+            _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
         }
 
     }
@@ -116,7 +123,7 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
 
 
             delay(1000)
-            _mutableLiveDataTaskOperation.postValue(TaskOperation.onNullOperation("done"))
+            _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
         }
 
     }
@@ -135,8 +142,11 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
         if(title == "")
         {
             _mutableLiveDataTaskOperation.postValue(TaskOperation.onErrorAddTask("Task Title is required"))
+            viewModelScope.launch {
+                delay(1000)
+                _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
+            }
             return
-
         }
 
         _mutableLiveDataShowProgressBar.postValue(true)
@@ -169,7 +179,7 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
 
                     _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessAddTask(task))
                     delay(1000)
-                    _mutableLiveDataTaskOperation.postValue(TaskOperation.onNullOperation("done"))
+                    _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
                     Log.e("MyTag", "createTask:mutable create task posted ", )
 
                 }

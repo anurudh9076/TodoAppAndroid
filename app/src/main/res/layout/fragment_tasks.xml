@@ -88,7 +88,6 @@
         app:layout_constraintBottom_toBottomOf="@id/edt_search_task"
         app:layout_constraintEnd_toEndOf="@id/gl_task_vertical2"/>
     <androidx.recyclerview.widget.RecyclerView
-
         android:id="@+id/task_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

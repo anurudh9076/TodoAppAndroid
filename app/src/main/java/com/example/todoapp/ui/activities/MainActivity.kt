@@ -36,9 +36,6 @@ class MainActivity : AppCompatActivity() {
 
         initBottomNavigationMenu()
         setObservers()
-
-
-
     }
 
     private fun initBottomNavigationMenu() {

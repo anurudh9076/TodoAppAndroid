@@ -32,9 +32,8 @@ class DashboardFragment : Fragment() {
     private lateinit var mainActivityViewModel: MainActivityViewModel
     private lateinit var binding: FragmentDashboardBinding
 
-    private var arrayListYourTask = ArrayList<Task>()
+
     private lateinit var yourTaskAdapter: RecyclerTaskAdapter
-    private var arrayListCompletedTask = ArrayList<Task>()
     private lateinit var completedTaskAdapter: RecyclerTaskAdapter
 
 //    private var loggedInUser: User? = CustomApplication.loggedInUser
@@ -62,8 +61,8 @@ class DashboardFragment : Fragment() {
         setOnCLickListeners()
 
         mainActivityViewModel.getLoggedInUser()
-        yourTaskAdapter = RecyclerTaskAdapter(requireContext(), arrayListYourTask)
-        completedTaskAdapter=RecyclerTaskAdapter(requireContext(), arrayListCompletedTask)
+        yourTaskAdapter = RecyclerTaskAdapter(requireContext(), ArrayList())
+        completedTaskAdapter=RecyclerTaskAdapter(requireContext(), ArrayList())
 
         binding.recyclerDashboardYourTask.adapter=yourTaskAdapter
         binding.recyclerDashboardCompletedTask.adapter=completedTaskAdapter
@@ -73,8 +72,8 @@ class DashboardFragment : Fragment() {
 
     private fun setObservers() {
         mainActivityViewModel.liveDataLoggedInUser.observe(this) {
-            if(it!=null)
-                mainActivityViewModel.fetchTasksOfUser(it!!.id)
+//            if(it!=null)
+//                mainActivityViewModel.fetchTasksOfUser(it!!.id)
             binding.tvUserNameGreet.text = "Hello! ${it.name}"
             if (it.image_bitmap != null) {
                 binding.ivUserDashboard.setImageBitmap(it.image_bitmap)
@@ -98,8 +97,8 @@ class DashboardFragment : Fragment() {
             when (it) {
                 is TaskOperation.onSuccessFetchAllTasks -> {
 
-                    arrayListCompletedTask.clear()
-                    arrayListYourTask.clear()
+                    val arrayListCompletedTask=ArrayList<Task>()
+                    val arrayListYourTask=ArrayList<Task>()
                     for(task in it.list)
                     {
                         if(task.status==(Constants.Status.COMPLETED))
@@ -107,6 +106,8 @@ class DashboardFragment : Fragment() {
                         else
                             arrayListYourTask.add(task)
                     }
+                    yourTaskAdapter.arrayList=arrayListYourTask
+                    completedTaskAdapter.arrayList=arrayListCompletedTask
 
                     yourTaskAdapter.notifyDataSetChanged()
                     completedTaskAdapter.notifyDataSetChanged()

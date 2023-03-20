@@ -22,21 +22,5 @@ class CreateTaskViewModel: ViewModel() {
     val liveDataShowProcessBar: LiveData<Boolean>
         get()=_mutableLiveDataShowProgressBar
 
-//    fun createTask(title: String, description: String,listOfCategory:List<Category>,priority: String, remindTime: Date?,
-//                   status:String,taskImage: Bitmap? )
-//    {
-//
-//        _mutableLiveDataShowProgressBar.postValue(true)
-//
-//        viewModelScope.launch(Dispatchers.IO) {
-//
-//
-//            delay(1000)
-//
-//            repository.createTask(title,description,listOfCategory,priority,remindTime, status, taskImage)
-//            _mutableLiveDataShowProgressBar.postValue(false)
-//        }
-//
-//
-//    }
+
 }

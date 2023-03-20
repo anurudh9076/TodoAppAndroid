@@ -65,7 +65,7 @@ class ReminderFragment : Fragment() {
         initViews()
         setObservers()
         setOnCLickListeners()
-        mainActivityViewModel.getLoggedInUser()
+//        mainActivityViewModel.getLoggedInUser()
 
         taskAdapter = RecyclerTaskAdapter(requireContext(), arrayListTask)
 
@@ -155,50 +155,45 @@ class ReminderFragment : Fragment() {
 
     private fun setObservers() {
 
-        mainActivityViewModel.liveDataLoggedInUser.observe(this) {
-            if(it!=null)
-                mainActivityViewModel.fetchTasksOfUser(it!!.id)
-
-        }
-
         mainActivityViewModel.liveDataTaskOperation.observe(this)
         {
             when (it) {
                 is TaskOperation.onSuccessFetchAllTasks -> {
 
-                    arrayListTask.clear()
+                    val arrayReminderList=ArrayList<Task>()
+
                     for(task in it.list)
                     {
                         if(task.isReminderSet)
-                            arrayListTask.add(task)
+                            arrayReminderList.add(task)
                     }
 
+                    taskAdapter.arrayList=arrayReminderList
                     taskAdapter.notifyDataSetChanged()
 
                 }
 
                 is TaskOperation.onSuccessAddTask -> {
-                    arrayListTask.add(it.task)
-                    taskAdapter.notifyItemInserted(arrayListTask.size - 1)
+                    taskAdapter.arrayList.add(it.task)
+                    taskAdapter.notifyItemInserted(taskAdapter.arrayList.size - 1)
                     Toast.makeText(requireContext(),"Task Created Successfully",Toast.LENGTH_SHORT).show()
 
                 }
                 is TaskOperation.onSuccessDeleteTask -> {
-                    arrayListTask.remove(it.task)
+                    taskAdapter.arrayList.removeAt(it.position)
                     taskAdapter.notifyItemRemoved(it.position)
-
                 }
 
                 is TaskOperation.onSuccessUpdateTask ->
                 {
                     if(!it.task.isReminderSet)
                     {
-                        arrayListTask.removeAt(it.position)
+                        taskAdapter.arrayList.removeAt(it.position)
                         taskAdapter.notifyItemRemoved(it.position)
                     }
                     else
                     {
-                        arrayListTask[it.position] = it.task
+                        taskAdapter.arrayList[it.position] = it.task
                         taskAdapter.notifyItemChanged(it.position)
                     }
 
@@ -219,7 +214,6 @@ class ReminderFragment : Fragment() {
 
                 is TaskOperation.onErrorUpdateTask -> {
                     Toast.makeText(requireContext(),it.error,Toast.LENGTH_SHORT).show()
-
                 }
                 else -> {
 

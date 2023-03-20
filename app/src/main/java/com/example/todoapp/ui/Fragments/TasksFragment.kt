@@ -33,9 +33,7 @@ class TasksFragment : Fragment() {
     private val TAG = "MyTag"
     private lateinit var mainActivityViewModel: MainActivityViewModel
     private lateinit var binding: FragmentTasksBinding
-    private var arrayListTask = ArrayList<Task>()
     private lateinit var taskAdapter: RecyclerTaskAdapter
-//    private var loggedInUser: User? = CustomApplication.loggedInUser
 
 
 
@@ -49,12 +47,7 @@ class TasksFragment : Fragment() {
             requireActivity(),
             MainActivityViewModelFactory(todoRepository)
         )[MainActivityViewModel::class.java]
-//        if (loggedInUser != null)
-//            mainActivityViewModel.fetchTasksOfUser(loggedInUser!!.id)
-
     }
-
-
 
 
     override fun onCreateView(
@@ -66,7 +59,7 @@ class TasksFragment : Fragment() {
         setOnCLickListeners()
         mainActivityViewModel.getLoggedInUser()
 
-        taskAdapter = RecyclerTaskAdapter(requireContext(), arrayListTask)
+        taskAdapter = RecyclerTaskAdapter(requireContext(), ArrayList())
 
         taskAdapter.set(object : RecyclerTaskAdapter.OnItemClickListener {
             override fun onItemClick(task: Task,adapterPosition: Int) {
@@ -95,12 +88,11 @@ class TasksFragment : Fragment() {
             }
 
             override fun onItemLongCLick(task: Task) {
-//                mainActivityViewModel.deleteTask(task,po)
                 Log.e("MyTag", "onItemLongCLick: ")
             }
 
             override fun onClickButtonDelete(task: Task, position: Int) {
-                Log.e("MyTag", "onClickButtonDelete: ")
+
                 val builder = AlertDialog.Builder(requireContext())
                 builder.setTitle("Delete Task")
                 builder.setMessage("are you sure?")
@@ -115,7 +107,6 @@ class TasksFragment : Fragment() {
 
                 }
                 builder.show()
-
             }
 
         })
@@ -129,7 +120,6 @@ class TasksFragment : Fragment() {
     private fun setOnCLickListeners() {
 
         binding.btnAddTask.setOnClickListener {
-//           addTaskDialog()
 
             Log.d("MyTag", "BtnOnClick: ")
             CreateTaskActivity.setContext(requireActivity())
@@ -144,47 +134,39 @@ class TasksFragment : Fragment() {
     private fun setObservers() {
 
         mainActivityViewModel.liveDataLoggedInUser.observe(this) {
-            if(it!=null)
-                mainActivityViewModel.fetchTasksOfUser(it!!.id)
 
         }
         mainActivityViewModel.liveDataTasksList.observe(this)
         {
-//          arrayListTask.clear()
-//          arrayListTask.addAll(it)
-//          taskAdapter.notifyDataSetChanged()
 
         }
-//        mainActivityViewModel.liveDataLoggedInUser.observe(this)
-//        {
-//            loggedInUser = it
-//        }
+
         mainActivityViewModel.liveDataTaskOperation.observe(this)
         {
             when (it) {
                 is TaskOperation.onSuccessFetchAllTasks -> {
 
-                    arrayListTask.clear()
-                    arrayListTask.addAll(it.list)
+
+                    taskAdapter.arrayList=it.list
                     taskAdapter.notifyDataSetChanged()
 
                 }
 
                 is TaskOperation.onSuccessAddTask -> {
-                    arrayListTask.add(it.task)
-                    taskAdapter.notifyItemInserted(arrayListTask.size - 1)
+                    taskAdapter.arrayList.add(it.task)
+                    taskAdapter.notifyItemInserted(taskAdapter.arrayList.size - 1)
                     Toast.makeText(requireContext(),"Task Created Successfully",Toast.LENGTH_SHORT).show()
 
                 }
                 is TaskOperation.onSuccessDeleteTask -> {
-                    arrayListTask.remove(it.task)
+                    taskAdapter.arrayList.remove(it.task)
                     taskAdapter.notifyItemRemoved(it.position)
 
                 }
 
                 is TaskOperation.onSuccessUpdateTask ->
                 {
-                    arrayListTask[it.position] = it.task
+                    taskAdapter.arrayList[it.position] = it.task
                     taskAdapter.notifyItemChanged(it.position)
                     Toast.makeText(requireContext(),"Task Updated Successfully",Toast.LENGTH_SHORT).show()
 

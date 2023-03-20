@@ -1,5 +1,6 @@
 package com.example.todoapp.models
 
+import android.graphics.Bitmap
 import java.util.*
 
 data class Category(
@@ -7,6 +8,7 @@ data class Category(
     val name:String,
     val description:String,
     val iconId:Long,
+    val iconBitmap: Bitmap?,
     val userId:Long
 ) {
 }
