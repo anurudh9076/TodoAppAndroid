@@ -1,7 +1,6 @@
 package com.example.todoapp.ui.activities
 
 import android.app.DatePickerDialog
-import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
@@ -14,20 +13,19 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.todoapp.CustomApplication
-import com.example.todoapp.R
 import com.example.todoapp.adapters.RecyclerCategoryAdapter
 import com.example.todoapp.constants.Constants
 import com.example.todoapp.databinding.ActivityCreateTaskBinding
 import com.example.todoapp.databinding.BottomSheetAddCategoryBinding
-import com.example.todoapp.databinding.ItemCategoryBinding
-import com.example.todoapp.databinding.ItemCreateCategoryBinding
 import com.example.todoapp.models.Category
 import com.example.todoapp.sealedClasses.CategoryOperation
 import com.example.todoapp.sealedClasses.TaskOperation
@@ -35,7 +33,6 @@ import com.example.todoapp.viewmodel.MainActivityViewModel
 import com.example.todoapp.viewmodel.MainActivityViewModelFactory
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class CreateTaskActivity : AppCompatActivity() {
@@ -273,7 +270,7 @@ class CreateTaskActivity : AppCompatActivity() {
                 }
                 is CategoryOperation.OnSuccessAddCategory -> {
                     categoryList.add(Pair(it.category, false))
-                    categoryAdapter.notifyItemInserted(categoryList.size-1)
+                    categoryAdapter.notifyItemInserted(categoryList.size - 1)
                 }
                 else -> {
 
@@ -356,9 +353,6 @@ class CreateTaskActivity : AppCompatActivity() {
         }
         bottomSheetDialog.show()
     }
-
-
-
 
 
 }
