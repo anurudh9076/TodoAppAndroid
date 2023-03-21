@@ -6,7 +6,6 @@ import com.example.todoapp.models.Task
 sealed class TaskOperation {
 
     data class OnSuccessFetchAllTasks(val list: ArrayList<Task>) : TaskOperation()
-    data class OnSuccessFetchAllCategories(val list: ArrayList<Category>) : TaskOperation()
     data class OnSuccessUpdateTask(val task: Task, val position: Int) : TaskOperation()
     data class OnSuccessDeleteTask(val task: Task, val position: Int) : TaskOperation()
     data class OnSuccessAddTask(val task: Task) : TaskOperation()

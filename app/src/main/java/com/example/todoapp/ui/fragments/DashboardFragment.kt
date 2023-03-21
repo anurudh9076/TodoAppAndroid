@@ -1,4 +1,4 @@
-package com.example.todoapp.ui.Fragments
+package com.example.todoapp.ui.fragments
 
 import android.content.Intent
 import android.os.Bundle
@@ -50,7 +50,7 @@ class DashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
+        binding = FragmentDashboardBinding.inflate(inflater, container, false)
         setObservers()
         setOnCLickListeners()
 
@@ -61,11 +61,11 @@ class DashboardFragment : Fragment() {
         binding.recyclerDashboardYourTask.adapter=yourTaskAdapter
         binding.recyclerDashboardCompletedTask.adapter=completedTaskAdapter
 
-        return binding.root;
+        return binding.root
     }
 
     private fun setObservers() {
-        mainActivityViewModel.liveDataLoggedInUser.observe(this) {
+        mainActivityViewModel.liveDataLoggedInUser.observe(viewLifecycleOwner) {
 //            if(it!=null)
 //                mainActivityViewModel.fetchTasksOfUser(it!!.id)
             binding.tvUserNameGreet.text = "Hello! ${it.name}"
@@ -75,7 +75,7 @@ class DashboardFragment : Fragment() {
                 binding.ivUserDashboard.setImageResource(R.drawable.icon_user_default)
             }
         }
-        mainActivityViewModel.liveDataIsUserLoggedIn.observe(this)
+        mainActivityViewModel.liveDataIsUserLoggedIn.observe(viewLifecycleOwner)
         {
             if (it == false) {
                 Toast.makeText(requireContext(), "Logged Out Successfully", Toast.LENGTH_SHORT)
@@ -86,7 +86,7 @@ class DashboardFragment : Fragment() {
         }
 
 
-        mainActivityViewModel.liveDataTaskOperation.observe(this)
+        mainActivityViewModel.liveDataTaskOperation.observe(viewLifecycleOwner)
         {
             when (it) {
                 is TaskOperation.OnSuccessFetchAllTasks -> {

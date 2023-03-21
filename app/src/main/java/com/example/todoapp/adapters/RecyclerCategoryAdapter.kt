@@ -18,31 +18,24 @@ import com.example.todoapp.models.Category
 class RecyclerCategoryAdapter(val context: Context, var arrayList: ArrayList<Pair<Category,Boolean>>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private  val TAG = "MyTag"
     private var onItemClickListener: OnItemClickListener? = null
     fun set(onItemClickListener: OnItemClickListener) {
         this.onItemClickListener = onItemClickListener
     }
 
-    init{
-        Log.e(TAG, "init category adapter ", )
-    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
-        Log.e(TAG, "onCreateViewHolder: category", )
         val view = LayoutInflater.from(context).inflate(R.layout.item_category, parent, false)
         return CategoryViewHolder(view, onItemClickListener)
 
     }
 
     override fun getItemCount(): Int {
-        Log.e(TAG, "getItemCount: ${arrayList.size}", )
         return arrayList.size
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val taskHolder = holder as CategoryViewHolder
-        Log.e(TAG, "onBindViewHolder: ", )
         taskHolder.bind(arrayList[position].first,arrayList[position].second)
 
     }

@@ -16,7 +16,7 @@
         android:theme="@style/Theme.TodoApp"
         tools:targetApi="31">
         <activity
-            android:name=".CreateCategoryActivity"
+            android:name=".ui.activities.CreateCategoryActivity"
             android:exported="false" />
         <activity
             android:name=".ui.activities.UpdateTaskActivity"

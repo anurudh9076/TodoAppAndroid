@@ -29,6 +29,7 @@ import com.example.todoapp.databinding.BottomSheetAddCategoryBinding
 import com.example.todoapp.databinding.ItemCategoryBinding
 import com.example.todoapp.databinding.ItemCreateCategoryBinding
 import com.example.todoapp.models.Category
+import com.example.todoapp.sealedClasses.CategoryOperation
 import com.example.todoapp.sealedClasses.TaskOperation
 import com.example.todoapp.viewmodel.MainActivityViewModel
 import com.example.todoapp.viewmodel.MainActivityViewModelFactory
@@ -42,16 +43,15 @@ class CreateTaskActivity : AppCompatActivity() {
     private val TAG = "MyTag"
 
 
-
     private val arrayListTaskPriority = ArrayList<String>()
     private lateinit var mainActivityViewModel: MainActivityViewModel
     private lateinit var taskPrioritySpinner: Spinner
     private lateinit var binding: ActivityCreateTaskBinding
     private var imageBitmap: Bitmap? = null
     private var isReminderSet: Boolean = false
-    private val arrayListSelectedCategories=ArrayList<Category>()
-    private val categoryList=ArrayList<Pair<Category,Boolean>>()
-
+    private val arrayListSelectedCategories = ArrayList<Category>()
+    private val categoryList = ArrayList<Pair<Category, Boolean>>()
+    private val categoryAdapter = RecyclerCategoryAdapter(this, categoryList)
 
 
     private val c = Calendar.getInstance(TimeZone.getTimeZone("IST"))
@@ -66,13 +66,13 @@ class CreateTaskActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             it.data?.data?.let {
                 val imageUri: Uri = it
-                var bitmap:Bitmap
-                if(Build.VERSION.SDK_INT < 28) {
-                   bitmap= MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri)
+                var bitmap: Bitmap
+                if (Build.VERSION.SDK_INT < 28) {
+                    bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri)
                     imageBitmap = bitmap
                 } else {
                     val source = ImageDecoder.createSource(this.contentResolver, imageUri)
-                     bitmap = ImageDecoder.decodeBitmap(source)
+                    bitmap = ImageDecoder.decodeBitmap(source)
                 }
 
                 imageBitmap = bitmap
@@ -98,11 +98,10 @@ class CreateTaskActivity : AppCompatActivity() {
             MainActivityViewModelFactory(todoRepository)
         )[MainActivityViewModel::class.java]
 
+        mainActivityViewModel.fetchAllCategoriesOfUser()
         setTaskPrioritySpinner()
         setOnClickListeners()
         setObservers()
-
-
     }
 
 
@@ -119,22 +118,37 @@ class CreateTaskActivity : AppCompatActivity() {
             val taskDescription = binding.edtTaskDescription.text.toString()
             val taskPriority = binding.spinnerTaskPriority.selectedItem.toString()
 
-            if(isReminderSet)
-            {
+            if (isReminderSet) {
 
 
-                myReminderDateTime.set(selectedYear,selectedMonth,selectedDay,selectedHour,selectedMinute)
+                myReminderDateTime.set(
+                    selectedYear,
+                    selectedMonth,
+                    selectedDay,
+                    selectedHour,
+                    selectedMinute
+                )
                 mainActivityViewModel.createTask(
-                    taskTitle, taskDescription, arrayListSelectedCategories, taskPriority, true,myReminderDateTime,
-                    Constants.Status.NOT_STARTED.value, imageBitmap
+                    taskTitle,
+                    taskDescription,
+                    arrayListSelectedCategories,
+                    taskPriority,
+                    true,
+                    myReminderDateTime,
+                    Constants.Status.NOT_STARTED.value,
+                    imageBitmap
                 )
 
-            }
-            else
-            {
+            } else {
                 mainActivityViewModel.createTask(
-                    taskTitle, taskDescription, arrayListSelectedCategories, taskPriority, false,null,
-                    Constants.Status.NOT_STARTED.value, imageBitmap
+                    taskTitle,
+                    taskDescription,
+                    arrayListSelectedCategories,
+                    taskPriority,
+                    false,
+                    null,
+                    Constants.Status.NOT_STARTED.value,
+                    imageBitmap
                 )
 
 
@@ -148,27 +162,33 @@ class CreateTaskActivity : AppCompatActivity() {
             if (isChecked) {
                 isReminderSet = true
                 binding.tvTaskRemindTime.visibility = View.VISIBLE
-                binding.tvTaskRemindDate.visibility=View.VISIBLE
-                binding.tvBarrierDateTime.visibility=View.VISIBLE
+                binding.tvTaskRemindDate.visibility = View.VISIBLE
+                binding.tvBarrierDateTime.visibility = View.VISIBLE
 
                 val c = Calendar.getInstance(TimeZone.getTimeZone("IST"))
 
-                 selectedYear = c[Calendar.YEAR]
-                 selectedMonth = c[Calendar.MONTH]
-                 selectedDay = c[Calendar.DAY_OF_MONTH]
-                 selectedHour = c[Calendar.HOUR_OF_DAY]
-                 selectedMinute = c[Calendar.MINUTE]
+                selectedYear = c[Calendar.YEAR]
+                selectedMonth = c[Calendar.MONTH]
+                selectedDay = c[Calendar.DAY_OF_MONTH]
+                selectedHour = c[Calendar.HOUR_OF_DAY]
+                selectedMinute = c[Calendar.MINUTE]
 
 
-                binding.tvTaskRemindTime.text="$selectedHour:${selectedMinute+1}"
-                binding.tvTaskRemindDate.text="$selectedDay-${selectedMonth+1}-$selectedYear"
-                myReminderDateTime.set(selectedYear,selectedMonth,selectedDay,selectedHour,selectedMinute)
+                binding.tvTaskRemindTime.text = "$selectedHour:${selectedMinute + 1}"
+                binding.tvTaskRemindDate.text = "$selectedDay-${selectedMonth + 1}-$selectedYear"
+                myReminderDateTime.set(
+                    selectedYear,
+                    selectedMonth,
+                    selectedDay,
+                    selectedHour,
+                    selectedMinute
+                )
 
             } else {
                 isReminderSet = false
                 binding.tvTaskRemindTime.visibility = View.INVISIBLE
-                binding.tvTaskRemindDate.visibility=View.INVISIBLE
-                binding.tvBarrierDateTime.visibility=View.INVISIBLE
+                binding.tvTaskRemindDate.visibility = View.INVISIBLE
+                binding.tvBarrierDateTime.visibility = View.INVISIBLE
 
             }
         }
@@ -186,7 +206,8 @@ class CreateTaskActivity : AppCompatActivity() {
                     selectedDay = dayOfMonth
                     selectedYear = year
                     selectedMonth = monthOfYear
-                    binding.tvTaskRemindDate.text="$selectedDay-${selectedMonth+1}-$selectedYear"
+                    binding.tvTaskRemindDate.text =
+                        "$selectedDay-${selectedMonth + 1}-$selectedYear"
                 }, selectedYear, selectedMonth, selectedDay
             )
             datePickerDialog.show()
@@ -201,15 +222,15 @@ class CreateTaskActivity : AppCompatActivity() {
 
                     selectedMinute = minute
                     selectedHour = hourOfDay
-                    binding.tvTaskRemindTime.text="$selectedHour:${selectedMinute}"
-                },selectedHour, selectedMinute, true
+                    binding.tvTaskRemindTime.text = "$selectedHour:${selectedMinute}"
+                }, selectedHour, selectedMinute, true
             )
             timePickerDialog.show()
 
         }
 
 
-        binding.btnSelectCategory.setOnClickListener{
+        binding.btnSelectCategory.setOnClickListener {
             showBottomSheetDialog()
         }
 
@@ -244,13 +265,20 @@ class CreateTaskActivity : AppCompatActivity() {
         }
         mainActivityViewModel.liveDataCategoryOperation.observe(this)
         {
-            when(it)
-            {
-                is TaskOperation.OnSuccessFetchAllCategories -> {
-                    for(category in it.list)
-                        categoryList.add(Pair(category,false))
+            when (it) {
+                is CategoryOperation.OnSuccessFetchAllCategories -> {
+                    categoryList.clear()
+                    for (category in it.list)
+                        categoryList.add(Pair(category, false))
                 }
-                else -> {}
+                is CategoryOperation.OnSuccessAddCategory -> {
+                    categoryList.add(Pair(it.category, false))
+                    categoryAdapter.notifyItemInserted(categoryList.size-1)
+                }
+                else -> {
+
+
+                }
             }
         }
 
@@ -279,47 +307,49 @@ class CreateTaskActivity : AppCompatActivity() {
 
     private fun showBottomSheetDialog() {
         val bottomSheetDialog = BottomSheetDialog(this)
-        val bindingBottomSheet=BottomSheetAddCategoryBinding.inflate(layoutInflater)
+        val bindingBottomSheet = BottomSheetAddCategoryBinding.inflate(layoutInflater)
         bottomSheetDialog.setContentView(bindingBottomSheet.root)
 
 
-        val categoryAdapter=RecyclerCategoryAdapter(this,categoryList)
-        categoryAdapter.set(object :RecyclerCategoryAdapter.OnItemClickListener{
+
+        categoryAdapter.set(object : RecyclerCategoryAdapter.OnItemClickListener {
             override fun onItemChecked(category: Category, position: Int) {
                 arrayListSelectedCategories.add(category)
                 Log.e(TAG, "onItemChecked: size:-> ${arrayListSelectedCategories.size}")
-                categoryList[position] = Pair(category,true)
+                categoryList[position] = Pair(category, true)
 
             }
 
             override fun onItemUnchecked(category: Category, position: Int) {
                 arrayListSelectedCategories.remove(category)
                 Log.e(TAG, "onItemChecked: size:-> ${arrayListSelectedCategories.size}")
-                categoryList[position] = Pair(category,false)
+                categoryList[position] = Pair(category, false)
 
             }
         })
         bottomSheetDialog.setOnDismissListener {
 
             arrayListSelectedCategories.clear()
-            for(category in categoryList)
-            {
-                if(category.second)
-                {
+            for (category in categoryList) {
+                if (category.second) {
                     arrayListSelectedCategories.add(category.first)
                 }
 
             }
 
-            binding.tvCategoryCount.text="${arrayListSelectedCategories.size}"
+            binding.tvCategoryCount.text = "${arrayListSelectedCategories.size}"
             binding.tvCategoryCount.setTextColor(Color.BLUE)
 
 
         }
-        bindingBottomSheet.recyclerAddCategoryBottomSheet.adapter=categoryAdapter
+        bindingBottomSheet.recyclerAddCategoryBottomSheet.adapter = categoryAdapter
 
         bindingBottomSheet.btnCreateNewCategoryBottomSheet.setOnClickListener {
-            showAddCategoryDialog()
+
+            CreateCategoryActivity.setContextForViewModel(contextMainActivity as AppCompatActivity)
+            val intentCreateCategory =
+                Intent(bottomSheetDialog.context, CreateCategoryActivity()::class.java)
+            startActivity(intentCreateCategory)
         }
         bindingBottomSheet.btnSelectCategoriesBottomSheet.setOnClickListener {
             bottomSheetDialog.dismiss()
@@ -327,51 +357,8 @@ class CreateTaskActivity : AppCompatActivity() {
         bottomSheetDialog.show()
     }
 
-    private fun showAddCategoryDialog() {
-//        val dialogCreateCategory=Dialog(this)
-//        dialogCreateCategory.setContentView(R.layout.item_create_category)
-//        val bindingCreatedCategory=ItemCreateCategoryBinding.inflate(layoutInflater)
-//
-//        var categoryBitmap:Bitmap?=null
-//        bindingCreatedCategory.arrowBack.setOnClickListener {
-//            dialogCreateCategory.dismiss()
-//        }
-//
-////        bindingCreatedCategory.ivCreateCategory.setOnClickListener {
-////            val registerForResult =
-////                registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-////                    it.data?.data?.let {
-////                        val imageUri: Uri = it
-////                        var bitmap: Bitmap
-////                        if (Build.VERSION.SDK_INT < 28) {
-////                            bitmap =
-////                                MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri)
-////                            categoryBitmap = bitmap
-////                        } else {
-////                            val source = ImageDecoder.createSource(this.contentResolver, imageUri)
-////                            bitmap = ImageDecoder.decodeBitmap(source)
-////                        }
-////
-////                        categoryBitmap = bitmap
-////                        bindingCreatedCategory.ivCreateCategory.setImageBitmap(bitmap)
-////                    }
-////                }
-////            val intent = Intent()
-////            intent.type = "image/*"
-////            intent.action = Intent.ACTION_GET_CONTENT
-////            registerForResult.launch(intent)
-////        }
-//        bindingCreatedCategory.btnCreateCategory.setOnClickListener {
-//            val categoryName=bindingCreatedCategory.edtCategoryName.text.toString()
-//            val categoryDescription=bindingCreatedCategory.edtCategoryName.text.toString()
-//            Log.e(TAG, "clicked: " )
-//
-//        }
-//
-//
-//        dialogCreateCategory.show()
 
-    }
+
 
 
 }

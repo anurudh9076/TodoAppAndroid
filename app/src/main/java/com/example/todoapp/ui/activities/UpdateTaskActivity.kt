@@ -29,6 +29,7 @@ import com.example.todoapp.databinding.ActivityCreateTaskBinding
 import com.example.todoapp.databinding.BottomSheetAddCategoryBinding
 import com.example.todoapp.models.Category
 import com.example.todoapp.models.Task
+import com.example.todoapp.sealedClasses.CategoryOperation
 import com.example.todoapp.sealedClasses.TaskOperation
 import com.example.todoapp.viewmodel.MainActivityViewModel
 import com.example.todoapp.viewmodel.MainActivityViewModelFactory
@@ -46,7 +47,6 @@ class UpdateTaskActivity : AppCompatActivity() {
         fun setContext(context: FragmentActivity) {
             contextMainActivity = context
         }
-
     }
 
     private val arrayListTaskPriority = ArrayList<String>()
@@ -122,6 +122,7 @@ class UpdateTaskActivity : AppCompatActivity() {
             MainActivityViewModelFactory(todoRepository)
         )[MainActivityViewModel::class.java]
 
+        mainActivityViewModel.fetchAllCategoriesOfUser()
 
         setListeners()
         setObservers()
@@ -365,7 +366,8 @@ class UpdateTaskActivity : AppCompatActivity() {
         mainActivityViewModel.liveDataCategoryOperation.observe(this)
         {
             when (it) {
-                is TaskOperation.OnSuccessFetchAllCategories -> {
+                is CategoryOperation.OnSuccessFetchAllCategories -> {
+                    categoryList.clear()
                     for (category in it.list) {
 
                         if (setOfCategoriesIdForTask.contains(category.id))
@@ -393,71 +395,6 @@ class UpdateTaskActivity : AppCompatActivity() {
     }
 
 
-    private fun chooseDateTime() {
-        val selectDateTimeDialog = Dialog(this)
-        selectDateTimeDialog.setContentView(com.example.todoapp.R.layout.item_date_time_input)
-
-        val btnSelectDate =
-            selectDateTimeDialog.findViewById<Button>(com.example.todoapp.R.id.btn_date_picker)
-        val btnSelectTime =
-            selectDateTimeDialog.findViewById<TextView>(com.example.todoapp.R.id.btn_time_picker)
-        val tvDate = selectDateTimeDialog.findViewById<TextView>(com.example.todoapp.R.id.tv_date)
-        val tvTime = selectDateTimeDialog.findViewById<TextView>(com.example.todoapp.R.id.tv_time)
-        val btnOk =
-            selectDateTimeDialog.findViewById<Button>(com.example.todoapp.R.id.btn_select_data_time_ok)
-
-        tvDate.text = "$selectedDay-${selectedMonth + 1}-$selectedYear"
-        tvTime.text = "$selectedHour:$selectedMinute"
-
-
-        btnSelectDate.setOnClickListener {
-
-            // Get Current Date
-
-            val datePickerDialog = DatePickerDialog(
-                this,
-                { view, year, monthOfYear, dayOfMonth ->
-
-                    tvDate.text = dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year
-                    selectedDay = dayOfMonth
-                    selectedYear = year
-                    selectedMonth = monthOfYear
-                }, selectedYear, selectedMonth, selectedDay
-            )
-            datePickerDialog.show()
-
-        }
-
-        btnSelectTime.setOnClickListener {
-
-            val timePickerDialog = TimePickerDialog(
-                this,
-                { view, hourOfDay, minute ->
-                    tvTime.text = "$hourOfDay:$minute"
-                    selectedMinute = minute
-                    selectedHour = hourOfDay
-                }, selectedHour, selectedMinute, true
-            )
-            timePickerDialog.show()
-
-        }
-        btnOk.setOnClickListener {
-
-//            myReminderDateTime.set(
-//                selectedYear,
-//                selectedMonth,
-//                selectedDay,
-//                selectedHour,
-//                selectedMinute
-//            )
-            binding.tvTaskRemindTime.text =
-                "$selectedDay-${selectedMonth + 1}-$selectedYear | $selectedHour:$selectedMinute"
-            Log.e(TAG, "choosenDateTime: $myReminderDateTime")
-            selectDateTimeDialog.dismiss()
-        }
-
-        selectDateTimeDialog.show()
-    }
 
     private fun showBottomSheetDialog() {
         val bottomSheetDialog = BottomSheetDialog(this)
@@ -478,7 +415,6 @@ class UpdateTaskActivity : AppCompatActivity() {
                 arrayListSelectedCategories.remove(category)
                 Log.e(TAG, "onItemChecked: size:-> ${arrayListSelectedCategories.size}")
                 categoryList[position] = Pair(category, false)
-
             }
 
         })
@@ -494,7 +430,6 @@ class UpdateTaskActivity : AppCompatActivity() {
 
             binding.tvCategoryCount.text = "${arrayListSelectedCategories.size}"
             binding.tvCategoryCount.setTextColor(Color.BLUE)
-
 
         }
         bindingBottomSheet.recyclerAddCategoryBottomSheet.adapter = categoryAdapter

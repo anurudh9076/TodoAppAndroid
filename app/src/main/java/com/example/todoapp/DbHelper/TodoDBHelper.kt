@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import com.example.todoapp.constants.Constants
 import com.example.todoapp.models.Category
 import com.example.todoapp.models.Task
@@ -283,6 +284,7 @@ class TodoDBHelper(context: Context) :
         values.put(KEY_CATEGORY_NAME, name)
         values.put(KEY_CATEGORY_DESCRIPTION, description)
         values.put(KEY_CATEGORY_USER_ID, userId)
+        values.put(KEY_CATEGORY_ICON_ID, -1)
 
         if (imageBitmap != null) {
             val imageId = insertImage(imageBitmap!!)
@@ -398,6 +400,7 @@ class TodoDBHelper(context: Context) :
 
 
             val categoriesList=fetchAllCategoriesOfTask(taskId)
+            Log.e(TAG, "getTask: "+categoriesList.size )
 
             task = Task(
                 taskId,
@@ -553,37 +556,21 @@ class TodoDBHelper(context: Context) :
         var category: Category? = null
         val db: SQLiteDatabase = this.readableDatabase
 
-        val cursor =
+        val cursorCategoryId =
             db.rawQuery(
                 "SELECT * FROM $TABLE_TASK_CATEGORY_MAPPING WHERE $KEY_ID_TASK = $taskId ",
                 null
             )
         try {
+            while (cursorCategoryId.moveToNext()) {
+                val categoryId = cursorCategoryId.getLong(2)
 
-            while (cursor.moveToNext()) {
-                val categoryId = cursor.getLong(0)
-                val categoryName = cursor.getString(1)
-                val categoryDescription = cursor.getString(2)
-                val categoryIconId = cursor.getLong(3)
-                val categoryUserId = cursor.getLong(4)
-
-
-                category = Category(
-                    id = categoryId,
-                    name = categoryName,
-                    description = categoryDescription,
-                    iconId = categoryIconId,
-                    iconBitmap = null,
-                    userId=categoryUserId
-                )
-
-                if (categoryIconId != -1L) {
-                    category.iconBitmap = getImage(categoryIconId)
-                }
-                categoriesList.add(category)
+                category = getCategory(categoryId = categoryId)
+                if(category!=null)
+                    categoriesList.add(category)
             }
 
-            cursor.close()
+            cursorCategoryId.close()
 
 
         } catch (e: java.lang.Exception) {
@@ -680,6 +667,42 @@ class TodoDBHelper(context: Context) :
             e.printStackTrace()
         }
         return 0
+    }
+
+    fun getCategory(categoryId: Long): Category? {
+
+        var category: Category? = null
+        val db: SQLiteDatabase = this.readableDatabase
+
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_CATEGORY WHERE $KEY_ID = $categoryId ", null)
+
+        try {
+            cursor.moveToNext()
+                val categoryId = cursor.getLong(0)
+                val categoryName = cursor.getString(1)
+                val categoryDescription = cursor.getString(2)
+                val categoryIconId = cursor.getLong(3)
+                val userId=cursor.getLong(4)
+
+
+                category = Category(
+                    id = categoryId,
+                    name = categoryName,
+                    description = categoryDescription,
+                    iconId = categoryIconId,
+                    iconBitmap = null,
+                    userId=userId
+                )
+
+                if (categoryIconId != -1L) {
+                    category.iconBitmap = getImage(categoryIconId)
+                }
+
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+
+        return category
     }
 
 

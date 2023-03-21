@@ -11,6 +11,7 @@ import com.example.todoapp.models.Category
 import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
 import com.example.todoapp.repository.TodoRepository
+import com.example.todoapp.sealedClasses.CategoryOperation
 import com.example.todoapp.sealedClasses.TaskOperation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -30,8 +31,8 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
     val liveDataTaskOperation: LiveData<TaskOperation>
         get() = _mutableLiveDataTaskOperation
 
-    private val _mutableLiveDataCategoryOperation = MutableLiveData<TaskOperation>()
-    val liveDataCategoryOperation: LiveData<TaskOperation>
+    private val _mutableLiveDataCategoryOperation = MutableLiveData<CategoryOperation>()
+    val liveDataCategoryOperation: LiveData<CategoryOperation>
         get() = _mutableLiveDataCategoryOperation
     private val _mutableLiveDataShowProgressBar = MutableLiveData<Boolean>()
     val liveDataShowProcessBar: LiveData<Boolean>
@@ -55,10 +56,9 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
 
     init {
 
-        if (CustomApplication.loggedInUser != null)
-        {
+        if (CustomApplication.loggedInUser != null) {
             fetchTasksOfUser(CustomApplication.loggedInUser!!.id)
-            fetchAllCategoriesOfUser(CustomApplication.loggedInUser!!.id)
+//            fetchAllCategoriesOfUser(CustomApplication.loggedInUser!!.id)
         }
 
     }
@@ -97,9 +97,26 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             Log.e(TAG, "fetchCategoriesOfUser: ")
             categoriesList = repository.fetchAllCategoriesOfUser(userId)
-            _mutableLiveDataCategoryOperation.postValue(TaskOperation.OnSuccessFetchAllCategories(categoriesList))
+            _mutableLiveDataCategoryOperation.postValue(
+                CategoryOperation.OnSuccessFetchAllCategories(
+                    categoriesList
+                )
+            )
         }
+    }
 
+    fun fetchAllCategoriesOfUser() {
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.e(TAG, "fetchCategoriesOfUser: ")
+            categoriesList = repository.fetchAllCategoriesOfUser()
+            _mutableLiveDataCategoryOperation.postValue(
+                CategoryOperation.OnSuccessFetchAllCategories(
+                    categoriesList
+                )
+            )
+
+
+        }
     }
 
     fun updateTask(task: Task, position: Int) {
@@ -208,7 +225,55 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
 
                 }
             }
-
         }
+    }
+
+    fun createCategory(name: String, description: String, imageBitmap: Bitmap?) {
+        if (name == "") {
+            _mutableLiveDataCategoryOperation.postValue(CategoryOperation.OnErrorAddCategory("Category Name is required"))
+            viewModelScope.launch {
+                delay(1000)
+                _mutableLiveDataCategoryOperation.postValue(
+                    CategoryOperation.OnSuccessFetchAllCategories(
+                        categoriesList
+                    )
+                )
+            }
+            return
+        }
+
+
+        viewModelScope.launch(Dispatchers.IO) {
+
+
+            val categoryId = repository.createCategory(
+                name,
+                description,
+                imageBitmap,
+            )
+            if (categoryId == -1L) {
+                _mutableLiveDataCategoryOperation.postValue(CategoryOperation.OnErrorAddCategory("Failed To add Category"))
+            } else {
+                val category = repository.getCategory(categoryId)
+                if (category != null) {
+
+                    _mutableLiveDataCategoryOperation.postValue(
+                        CategoryOperation.OnSuccessAddCategory(
+                            category
+                        )
+                    )
+                    delay(1000)
+                    categoriesList.add(category)
+                    _mutableLiveDataCategoryOperation.postValue(
+                        CategoryOperation.OnSuccessFetchAllCategories(
+                            categoriesList
+                        )
+                    )
+                    Log.e("MyTag", "createTask:mutable create task posted ")
+
+                }
+            }
+        }
+
     }
 }

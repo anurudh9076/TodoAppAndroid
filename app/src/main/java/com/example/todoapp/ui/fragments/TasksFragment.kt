@@ -1,4 +1,4 @@
-package com.example.todoapp.ui.Fragments
+package com.example.todoapp.ui.fragments
 
 import android.content.Intent
 import android.graphics.Bitmap
@@ -25,14 +25,12 @@ import com.example.todoapp.viewmodel.MainActivityViewModelFactory
 import java.io.ByteArrayOutputStream
 
 
-class ReminderFragment : Fragment() {
+class TasksFragment : Fragment() {
 
     private val TAG = "MyTag"
     private lateinit var mainActivityViewModel: MainActivityViewModel
     private lateinit var binding: FragmentTasksBinding
-    private var arrayListTask = ArrayList<Task>()
     private lateinit var taskAdapter: RecyclerTaskAdapter
-//    private var loggedInUser: User? = CustomApplication.loggedInUser
 
 
 
@@ -46,12 +44,7 @@ class ReminderFragment : Fragment() {
             requireActivity(),
             MainActivityViewModelFactory(todoRepository)
         )[MainActivityViewModel::class.java]
-//        if (loggedInUser != null)
-//            mainActivityViewModel.fetchTasksOfUser(loggedInUser!!.id)
-
     }
-
-
 
 
     override fun onCreateView(
@@ -59,12 +52,11 @@ class ReminderFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentTasksBinding.inflate(inflater, container, false);
-        initViews()
         setObservers()
         setOnCLickListeners()
-//        mainActivityViewModel.getLoggedInUser()
+        mainActivityViewModel.getLoggedInUser()
 
-        taskAdapter = RecyclerTaskAdapter(requireContext(), arrayListTask)
+        taskAdapter = RecyclerTaskAdapter(requireContext(), ArrayList())
 
         taskAdapter.set(object : RecyclerTaskAdapter.OnItemClickListener {
             override fun onItemClick(task: Task,adapterPosition: Int) {
@@ -93,12 +85,11 @@ class ReminderFragment : Fragment() {
             }
 
             override fun onItemLongCLick(task: Task) {
-//                mainActivityViewModel.deleteTask(task,po)
                 Log.e("MyTag", "onItemLongCLick: ")
             }
 
             override fun onClickButtonDelete(task: Task, position: Int) {
-                Log.e("MyTag", "onClickButtonDelete: ")
+
                 val builder = AlertDialog.Builder(requireContext())
                 builder.setTitle("Delete Task")
                 builder.setMessage("are you sure?")
@@ -113,7 +104,6 @@ class ReminderFragment : Fragment() {
 
                 }
                 builder.show()
-
             }
 
         })
@@ -124,21 +114,9 @@ class ReminderFragment : Fragment() {
         return binding.root;
     }
 
-    private fun initViews()
-    {
-        binding.tvAllTask.text=Constants.REMINDERS
-        binding.btnAddTask.visibility=View.INVISIBLE
-        binding.edtSearchTask.visibility=View.GONE
-        binding.btnSearchTask.visibility=View.GONE
-        binding.btnFilterTask.visibility=View.GONE
-
-
-    }
-
     private fun setOnCLickListeners() {
 
         binding.btnAddTask.setOnClickListener {
-//           addTaskDialog()
 
             Log.d("MyTag", "BtnOnClick: ")
             CreateTaskActivity.setContext(requireActivity())
@@ -152,20 +130,21 @@ class ReminderFragment : Fragment() {
 
     private fun setObservers() {
 
+        mainActivityViewModel.liveDataLoggedInUser.observe(this) {
+
+        }
+        mainActivityViewModel.liveDataTasksList.observe(this)
+        {
+
+        }
+
         mainActivityViewModel.liveDataTaskOperation.observe(this)
         {
             when (it) {
                 is TaskOperation.OnSuccessFetchAllTasks -> {
 
-                    val arrayReminderList=ArrayList<Task>()
 
-                    for(task in it.list)
-                    {
-                        if(task.isReminderSet)
-                            arrayReminderList.add(task)
-                    }
-
-                    taskAdapter.arrayList=arrayReminderList
+                    taskAdapter.arrayList=it.list
                     taskAdapter.notifyDataSetChanged()
 
                 }
@@ -177,23 +156,15 @@ class ReminderFragment : Fragment() {
 
                 }
                 is TaskOperation.OnSuccessDeleteTask -> {
-                    taskAdapter.arrayList.removeAt(it.position)
+                    taskAdapter.arrayList.remove(it.task)
                     taskAdapter.notifyItemRemoved(it.position)
+
                 }
 
                 is TaskOperation.OnSuccessUpdateTask ->
                 {
-                    if(!it.task.isReminderSet)
-                    {
-                        taskAdapter.arrayList.removeAt(it.position)
-                        taskAdapter.notifyItemRemoved(it.position)
-                    }
-                    else
-                    {
-                        taskAdapter.arrayList[it.position] = it.task
-                        taskAdapter.notifyItemChanged(it.position)
-                    }
-
+                    taskAdapter.arrayList[it.position] = it.task
+                    taskAdapter.notifyItemChanged(it.position)
                     Toast.makeText(requireContext(),"Task Updated Successfully",Toast.LENGTH_SHORT).show()
 
                 }
@@ -211,6 +182,7 @@ class ReminderFragment : Fragment() {
 
                 is TaskOperation.OnErrorUpdateTask -> {
                     Toast.makeText(requireContext(),it.error,Toast.LENGTH_SHORT).show()
+
                 }
                 else -> {
 
