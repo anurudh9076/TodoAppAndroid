@@ -33,9 +33,8 @@ class MainActivity : AppCompatActivity() {
 
         val dbHelper = TodoDBHelper.getInstance(this)
         val todoRepository = TodoRepository(dbHelper)
-//        mainActivityViewModel = ViewModelProvider(this, MainActivityViewModelFactory(todoRepository))[MainActivityViewModel::class.java]
-        mainActivityViewModel= CustomApplication.mainActivityViewModel
-        Log.e("MyTag", "viewModel: main Activity ${mainActivityViewModel.hashCode()}", )
+        mainActivityViewModel = ViewModelProvider(this, MainActivityViewModelFactory(todoRepository))[MainActivityViewModel::class.java]
+
 
 
         initBottomNavigationMenu()

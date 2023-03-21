@@ -117,12 +117,10 @@ class UpdateTaskActivity : AppCompatActivity() {
         initView() //initialize all the views with given task values
 
         val todoRepository = CustomApplication.todoRepository
-//        mainActivityViewModel = ViewModelProvider(
-//            contextMainActivity as AppCompatActivity,
-//            MainActivityViewModelFactory(todoRepository)
-//        )[MainActivityViewModel::class.java]
-        mainActivityViewModel=CustomApplication.mainActivityViewModel
-        Log.e(TAG, "viewModel: update Activity ${mainActivityViewModel.hashCode()}", )
+        mainActivityViewModel = ViewModelProvider(
+            contextMainActivity as AppCompatActivity,
+            MainActivityViewModelFactory(todoRepository)
+        )[MainActivityViewModel::class.java]
 
 
         setListeners()

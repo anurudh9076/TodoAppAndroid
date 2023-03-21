@@ -93,18 +93,15 @@ class CreateTaskActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val todoRepository = CustomApplication.todoRepository
-//        mainActivityViewModel = ViewModelProvider(
-//            contextMainActivity as AppCompatActivity,
-//            MainActivityViewModelFactory(todoRepository)
-//        )[MainActivityViewModel::class.java]
-        mainActivityViewModel=CustomApplication.mainActivityViewModel
-        Log.e(TAG, "viewModel: Create Activity ${mainActivityViewModel.hashCode()}", )
+        mainActivityViewModel = ViewModelProvider(
+            contextMainActivity as AppCompatActivity,
+            MainActivityViewModelFactory(todoRepository)
+        )[MainActivityViewModel::class.java]
+
         setTaskPrioritySpinner()
         setOnClickListeners()
         setObservers()
-        Log.d(TAG, "instance in create activity: ${mainActivityViewModel.hashCode()}")
 
-//        createTempCategories()
 
     }
 
@@ -131,7 +128,7 @@ class CreateTaskActivity : AppCompatActivity() {
                     taskTitle, taskDescription, arrayListSelectedCategories, taskPriority, true,myReminderDateTime,
                     Constants.Status.NOT_STARTED.value, imageBitmap
                 )
-                Log.e(TAG, "isremider set: $myReminderDateTime" )
+
             }
             else
             {
@@ -140,7 +137,7 @@ class CreateTaskActivity : AppCompatActivity() {
                     Constants.Status.NOT_STARTED.value, imageBitmap
                 )
 
-                Log.e(TAG, "isremider not set: $myReminderDateTime" )
+
             }
 
 //            finish()
