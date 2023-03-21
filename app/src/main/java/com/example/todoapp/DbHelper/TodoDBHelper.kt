@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.example.todoapp.constants.Constants
+import com.example.todoapp.models.Category
 import com.example.todoapp.models.Task
 import com.example.todoapp.models.User
 import java.io.*
@@ -288,12 +289,7 @@ class TodoDBHelper(context: Context) :
             if (imageId.equals(-1)) {
                 return -1 //insert image failed..return
             }
-            try {
-
-                values.put(KEY_CATEGORY_ICON_ID, imageId)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            values.put(KEY_CATEGORY_ICON_ID, imageId)
         }
 
         try {
@@ -401,11 +397,14 @@ class TodoDBHelper(context: Context) :
             }
 
 
+            val categoriesList=fetchAllCategoriesOfTask(taskId)
+
             task = Task(
                 taskId,
                 taskTitle,
                 taskDescription,
                 taskPriority!!,
+                categoriesList,
                 taskIsReminderSet == 1,
                 remindDateTime,
                 taskStatus!!,
@@ -467,12 +466,14 @@ class TodoDBHelper(context: Context) :
                     }
                 }
 
+                val categoriesList=fetchAllCategoriesOfTask(taskId)
 
                 task = Task(
                     taskId,
                     taskTitle,
                     taskDescription,
                     taskPriority!!,
+                    categoriesList,
                     taskIsReminderSet == 1,
                     remindDateTime,
                     taskStatus!!,
@@ -498,6 +499,101 @@ class TodoDBHelper(context: Context) :
 
     }
 
+    fun fetchAllCategoriesOfUser(userId: Long): ArrayList<Category> {
+
+        val categoriesList = ArrayList<Category>()
+        var category: Category? = null
+        val db: SQLiteDatabase = this.readableDatabase
+
+        val cursor =
+            db.rawQuery(
+                "SELECT * FROM $TABLE_CATEGORY WHERE $KEY_CATEGORY_USER_ID = $userId ",
+                null
+            )
+
+        try {
+
+            while (cursor.moveToNext()) {
+                val categoryId = cursor.getLong(0)
+                val categoryName = cursor.getString(1)
+                val categoryDescription = cursor.getString(2)
+                val categoryIconId = cursor.getLong(3)
+
+
+                category = Category(
+                    id = categoryId,
+                    name = categoryName,
+                    description = categoryDescription,
+                    iconId = categoryIconId,
+                    iconBitmap = null,
+                    userId=userId
+                )
+
+                if (categoryIconId != -1L) {
+                    category.iconBitmap = getImage(categoryIconId)
+                }
+                categoriesList.add(category)
+
+            }
+
+            cursor.close()
+
+
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+
+        return categoriesList
+
+    }
+
+    fun fetchAllCategoriesOfTask(taskId: Long): ArrayList<Category> {
+
+        val categoriesList = ArrayList<Category>()
+        var category: Category? = null
+        val db: SQLiteDatabase = this.readableDatabase
+
+        val cursor =
+            db.rawQuery(
+                "SELECT * FROM $TABLE_TASK_CATEGORY_MAPPING WHERE $KEY_ID_TASK = $taskId ",
+                null
+            )
+        try {
+
+            while (cursor.moveToNext()) {
+                val categoryId = cursor.getLong(0)
+                val categoryName = cursor.getString(1)
+                val categoryDescription = cursor.getString(2)
+                val categoryIconId = cursor.getLong(3)
+                val categoryUserId = cursor.getLong(4)
+
+
+                category = Category(
+                    id = categoryId,
+                    name = categoryName,
+                    description = categoryDescription,
+                    iconId = categoryIconId,
+                    iconBitmap = null,
+                    userId=categoryUserId
+                )
+
+                if (categoryIconId != -1L) {
+                    category.iconBitmap = getImage(categoryIconId)
+                }
+                categoriesList.add(category)
+            }
+
+            cursor.close()
+
+
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+
+        return categoriesList
+
+    }
+
     fun createTaskCategoryMapping(taskId: Long, categoryId: Long): Long {
         var insertedRowId: Long = -1
         val db = this.writableDatabase
@@ -508,7 +604,7 @@ class TodoDBHelper(context: Context) :
 
 
         try {
-            insertedRowId = db.insert(TABLE_TASKS, null, values)
+            insertedRowId = db.insert(TABLE_TASK_CATEGORY_MAPPING, null, values)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -535,7 +631,7 @@ class TodoDBHelper(context: Context) :
             cv.put(KEY_TASK_DESCRIPTION, task.description)
             cv.put(KEY_TASK_STATUS, task.status.value)
             cv.put(KEY_TASK_PRIORITY, task.priority.priority)
-            cv.put(KEY_TASK_IS_REMINDER_SET,task.isReminderSet)
+            cv.put(KEY_TASK_IS_REMINDER_SET, task.isReminderSet)
 
             if (task.isReminderSet && task.reminderTime != null) {
                 try {

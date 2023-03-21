@@ -13,7 +13,6 @@ import com.example.todoapp.models.User
 import com.example.todoapp.repository.TodoRepository
 import com.example.todoapp.sealedClasses.TaskOperation
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
@@ -21,7 +20,7 @@ import kotlin.collections.ArrayList
 
 class MainActivityViewModel(private val repository: TodoRepository) : ViewModel() {
 
-    private  val TAG = "MyTag"
+    private val TAG = "MyTag"
 
     private val _mutableLiveDataLoggedInUser = MutableLiveData<User>()
     val liveDataLoggedInUser: LiveData<User>
@@ -31,6 +30,9 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
     val liveDataTaskOperation: LiveData<TaskOperation>
         get() = _mutableLiveDataTaskOperation
 
+    private val _mutableLiveDataCategoryOperation = MutableLiveData<TaskOperation>()
+    val liveDataCategoryOperation: LiveData<TaskOperation>
+        get() = _mutableLiveDataCategoryOperation
     private val _mutableLiveDataShowProgressBar = MutableLiveData<Boolean>()
     val liveDataShowProcessBar: LiveData<Boolean>
         get() = _mutableLiveDataShowProgressBar
@@ -48,13 +50,19 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
     val liveDataTemp: LiveData<List<Task>>
         get() = _mutableLiveDataTemp
 
-    private var tasksList=ArrayList<Task>()
+    private var tasksList = ArrayList<Task>()
+    private var categoriesList = ArrayList<Category>()
 
     init {
 
-        if(CustomApplication.loggedInUser!=null)
+        if (CustomApplication.loggedInUser != null)
+        {
             fetchTasksOfUser(CustomApplication.loggedInUser!!.id)
+            fetchAllCategoriesOfUser(CustomApplication.loggedInUser!!.id)
+        }
+
     }
+
     fun getLoggedInUser() {
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -76,54 +84,67 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
         }
     }
 
-    fun fetchTasksOfUser(userId: Long) {
+    private fun fetchTasksOfUser(userId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.e(TAG, "fetchTasksOfUser: " )
-            tasksList= repository.fetchTasksOfUser(userId)
-            _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
+            Log.e(TAG, "fetchTasksOfUser: ")
+            tasksList = repository.fetchTasksOfUser(userId)
+            _mutableLiveDataTaskOperation.postValue(TaskOperation.OnSuccessFetchAllTasks(tasksList))
         }
 
     }
 
-    fun updateTask(task: Task,position: Int)
-    {
+    private fun fetchAllCategoriesOfUser(userId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.e(TAG, "fetchCategoriesOfUser: ")
+            categoriesList = repository.fetchAllCategoriesOfUser(userId)
+            _mutableLiveDataCategoryOperation.postValue(TaskOperation.OnSuccessFetchAllCategories(categoriesList))
+        }
+
+    }
+
+    fun updateTask(task: Task, position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
 
             val rowsUpdated = repository.updateTask(task)
 
-            if(rowsUpdated==1)
-            {
-                _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessUpdateTask(task,position))
-            }
-            else
-            {
-                _mutableLiveDataTaskOperation.postValue((TaskOperation.onErrorUpdateTask("some error has occurred")))
+            if (rowsUpdated == 1) {
+                _mutableLiveDataTaskOperation.postValue(
+                    TaskOperation.OnSuccessUpdateTask(
+                        task,
+                        position
+                    )
+                )
+            } else {
+                _mutableLiveDataTaskOperation.postValue((TaskOperation.OnErrorUpdateTask("some error has occurred")))
             }
 
             delay(1000)
-            _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
+            _mutableLiveDataTaskOperation.postValue(TaskOperation.OnSuccessFetchAllTasks(tasksList))
         }
 
     }
-    fun deleteTask(task: Task, position:Int) {
+
+    fun deleteTask(task: Task, position: Int) {
 
         viewModelScope.launch(Dispatchers.IO) {
 
             val rowsDeleted = repository.deleteTask(task.id)
 
-            if(rowsDeleted==1)
-            {
-                _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessDeleteTask(task,position))
+            if (rowsDeleted == 1) {
+                _mutableLiveDataTaskOperation.postValue(
+                    TaskOperation.OnSuccessDeleteTask(
+                        task,
+                        position
+                    )
+                )
 
-            }
-            else
-            {
-                _mutableLiveDataTaskOperation.postValue(TaskOperation.onErrorDeleteTask("delete failed"))
+            } else {
+                _mutableLiveDataTaskOperation.postValue(TaskOperation.OnErrorDeleteTask("delete failed"))
             }
 
 
             delay(1000)
-            _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
+            _mutableLiveDataTaskOperation.postValue(TaskOperation.OnSuccessFetchAllTasks(tasksList))
         }
 
     }
@@ -133,18 +154,21 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
         description: String,
         listOfCategory: List<Category>,
         priority: String,
-        isReminderSet:Boolean,
+        isReminderSet: Boolean,
         remindTime: Calendar?,
         status: String,
         taskImage: Bitmap?
     ) {
 
-        if(title == "")
-        {
-            _mutableLiveDataTaskOperation.postValue(TaskOperation.onErrorAddTask("Task Title is required"))
+        if (title == "") {
+            _mutableLiveDataTaskOperation.postValue(TaskOperation.OnErrorAddTask("Task Title is required"))
             viewModelScope.launch {
                 delay(1000)
-                _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
+                _mutableLiveDataTaskOperation.postValue(
+                    TaskOperation.OnSuccessFetchAllTasks(
+                        tasksList
+                    )
+                )
             }
             return
         }
@@ -156,7 +180,7 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
 
             delay(1000)
 
-            val taskId=repository.createTask(
+            val taskId = repository.createTask(
                 title,
                 description,
                 listOfCategory,
@@ -166,21 +190,21 @@ class MainActivityViewModel(private val repository: TodoRepository) : ViewModel(
                 status,
                 taskImage
             )
-            if(taskId==-1L)
-            {
-                _mutableLiveDataTaskOperation.postValue(TaskOperation.onErrorAddTask("Failed To add Task"))
-            }
-            else
-            {
-                val task=repository.getTask(taskId)
+            if (taskId == -1L) {
+                _mutableLiveDataTaskOperation.postValue(TaskOperation.OnErrorAddTask("Failed To add Task"))
+            } else {
+                val task = repository.getTask(taskId)
                 _mutableLiveDataShowProgressBar.postValue(false)
-                if(task!=null)
-                {
+                if (task != null) {
 
-                    _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessAddTask(task))
+                    _mutableLiveDataTaskOperation.postValue(TaskOperation.OnSuccessAddTask(task))
                     delay(1000)
-                    _mutableLiveDataTaskOperation.postValue(TaskOperation.onSuccessFetchAllTasks(tasksList))
-                    Log.e("MyTag", "createTask:mutable create task posted ", )
+                    _mutableLiveDataTaskOperation.postValue(
+                        TaskOperation.OnSuccessFetchAllTasks(
+                            tasksList
+                        )
+                    )
+                    Log.e("MyTag", "createTask:mutable create task posted ")
 
                 }
             }

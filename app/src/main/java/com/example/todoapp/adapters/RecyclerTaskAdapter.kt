@@ -87,7 +87,6 @@ class RecyclerTaskAdapter(val context: Context, var arrayList: ArrayList<Task>) 
                     onItemClickListener?.onItemClick(task,adapterPosition)
 
                 }
-//                Log.e("MyTag", "Clicked on task ")
             }
 
             taskRow.setOnLongClickListener {
@@ -102,11 +101,7 @@ class RecyclerTaskAdapter(val context: Context, var arrayList: ArrayList<Task>) 
                     onItemClickListener?.onClickButtonDelete(task,adapterPosition)
                 }
             }
-
-
         }
-
-
     }
 
     interface OnItemClickListener {

@@ -11,14 +11,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.todoapp.CustomApplication
 import com.example.todoapp.DbHelper.TodoDBHelper
-import com.example.todoapp.R
 import com.example.todoapp.adapters.RecyclerTaskAdapter
 import com.example.todoapp.constants.Constants
 import com.example.todoapp.databinding.FragmentTasksBinding
 import com.example.todoapp.models.Task
-import com.example.todoapp.models.User
 import com.example.todoapp.repository.TodoRepository
 import com.example.todoapp.sealedClasses.TaskOperation
 import com.example.todoapp.ui.activities.CreateTaskActivity
@@ -158,7 +155,7 @@ class ReminderFragment : Fragment() {
         mainActivityViewModel.liveDataTaskOperation.observe(this)
         {
             when (it) {
-                is TaskOperation.onSuccessFetchAllTasks -> {
+                is TaskOperation.OnSuccessFetchAllTasks -> {
 
                     val arrayReminderList=ArrayList<Task>()
 
@@ -173,18 +170,18 @@ class ReminderFragment : Fragment() {
 
                 }
 
-                is TaskOperation.onSuccessAddTask -> {
+                is TaskOperation.OnSuccessAddTask -> {
                     taskAdapter.arrayList.add(it.task)
                     taskAdapter.notifyItemInserted(taskAdapter.arrayList.size - 1)
                     Toast.makeText(requireContext(),"Task Created Successfully",Toast.LENGTH_SHORT).show()
 
                 }
-                is TaskOperation.onSuccessDeleteTask -> {
+                is TaskOperation.OnSuccessDeleteTask -> {
                     taskAdapter.arrayList.removeAt(it.position)
                     taskAdapter.notifyItemRemoved(it.position)
                 }
 
-                is TaskOperation.onSuccessUpdateTask ->
+                is TaskOperation.OnSuccessUpdateTask ->
                 {
                     if(!it.task.isReminderSet)
                     {
@@ -200,19 +197,19 @@ class ReminderFragment : Fragment() {
                     Toast.makeText(requireContext(),"Task Updated Successfully",Toast.LENGTH_SHORT).show()
 
                 }
-                is TaskOperation.onErrorFetchAllCTask -> {
+                is TaskOperation.OnErrorFetchAllCTask -> {
                     Log.d(TAG, "TaskFetchFailed ")
                 }
-                is TaskOperation.onErrorAddTask -> {
+                is TaskOperation.OnErrorAddTask -> {
                     Toast.makeText(requireContext(),it.error,Toast.LENGTH_SHORT).show()
 
                 }
-                is TaskOperation.onErrorDeleteTask -> {
+                is TaskOperation.OnErrorDeleteTask -> {
                     Toast.makeText(requireContext(),it.error,Toast.LENGTH_SHORT).show()
 
                 }
 
-                is TaskOperation.onErrorUpdateTask -> {
+                is TaskOperation.OnErrorUpdateTask -> {
                     Toast.makeText(requireContext(),it.error,Toast.LENGTH_SHORT).show()
                 }
                 else -> {

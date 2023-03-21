@@ -8,23 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.example.todoapp.CustomApplication
 import com.example.todoapp.DbHelper.TodoDBHelper
 import com.example.todoapp.R
 import com.example.todoapp.adapters.RecyclerTaskAdapter
 import com.example.todoapp.constants.Constants
 import com.example.todoapp.databinding.FragmentDashboardBinding
 import com.example.todoapp.models.Task
-import com.example.todoapp.models.User
 import com.example.todoapp.repository.TodoRepository
 import com.example.todoapp.sealedClasses.TaskOperation
 import com.example.todoapp.ui.activities.LoginActivity
 import com.example.todoapp.viewmodel.MainActivityViewModel
 import com.example.todoapp.viewmodel.MainActivityViewModelFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import javax.net.ssl.SSLEngineResult.Status
 
 
 class DashboardFragment : Fragment() {
@@ -95,7 +89,7 @@ class DashboardFragment : Fragment() {
         mainActivityViewModel.liveDataTaskOperation.observe(this)
         {
             when (it) {
-                is TaskOperation.onSuccessFetchAllTasks -> {
+                is TaskOperation.OnSuccessFetchAllTasks -> {
 
                     val arrayListCompletedTask=ArrayList<Task>()
                     val arrayListYourTask=ArrayList<Task>()

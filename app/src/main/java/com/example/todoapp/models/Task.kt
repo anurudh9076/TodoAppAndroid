@@ -10,6 +10,7 @@ data class Task(
     var title:String,
     var description:String,
     var priority:Constants.Priority,
+    var categoriesList:ArrayList<Category>,
     val isReminderSet:Boolean,
     var reminderTime:Calendar?,
     var status:Constants.Status,

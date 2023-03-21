@@ -1,19 +1,22 @@
 package com.example.todoapp.sealedClasses
 
+import com.example.todoapp.models.Category
 import com.example.todoapp.models.Task
 
 sealed class TaskOperation {
 
-    data class onSuccessFetchAllTasks(val list: ArrayList<Task>) : TaskOperation()
-    data class onSuccessUpdateTask(val task: Task, val position: Int) : TaskOperation()
-    data class onSuccessDeleteTask(val task: Task, val position: Int) : TaskOperation()
-    data class onSuccessAddTask(val task: Task) : TaskOperation()
+    data class OnSuccessFetchAllTasks(val list: ArrayList<Task>) : TaskOperation()
+    data class OnSuccessFetchAllCategories(val list: ArrayList<Category>) : TaskOperation()
+    data class OnSuccessUpdateTask(val task: Task, val position: Int) : TaskOperation()
+    data class OnSuccessDeleteTask(val task: Task, val position: Int) : TaskOperation()
+    data class OnSuccessAddTask(val task: Task) : TaskOperation()
 
-    data class onErrorFetchAllCTask(val error: String) : TaskOperation()
-    data class onErrorUpdateTask(val error: String) : TaskOperation()
-    data class onErrorDeleteTask(val error: String) : TaskOperation()
-    data class onErrorAddTask(val error: String) : TaskOperation()
 
-    data class onNullOperation(val error: String) : TaskOperation()
+    data class OnErrorFetchAllCTask(val error: String) : TaskOperation()
+    data class OnErrorUpdateTask(val error: String) : TaskOperation()
+    data class OnErrorDeleteTask(val error: String) : TaskOperation()
+    data class OnErrorAddTask(val error: String) : TaskOperation()
+
+    data class OnNullOperation(val error: String) : TaskOperation()
 
 }

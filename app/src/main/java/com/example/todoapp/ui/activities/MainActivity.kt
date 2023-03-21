@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.todoapp.CustomApplication
 import com.example.todoapp.DbHelper.TodoDBHelper
 import com.example.todoapp.R
 import com.example.todoapp.ui.Fragments.DashboardFragment
@@ -32,7 +33,10 @@ class MainActivity : AppCompatActivity() {
 
         val dbHelper = TodoDBHelper.getInstance(this)
         val todoRepository = TodoRepository(dbHelper)
-        mainActivityViewModel = ViewModelProvider(this, MainActivityViewModelFactory(todoRepository))[MainActivityViewModel::class.java]
+//        mainActivityViewModel = ViewModelProvider(this, MainActivityViewModelFactory(todoRepository))[MainActivityViewModel::class.java]
+        mainActivityViewModel= CustomApplication.mainActivityViewModel
+        Log.e("MyTag", "viewModel: main Activity ${mainActivityViewModel.hashCode()}", )
+
 
         initBottomNavigationMenu()
         setObservers()

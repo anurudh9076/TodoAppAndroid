@@ -72,10 +72,7 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
         return dbHelper.createCategory(name,description,imageBitmap,userId)
     }
 
-//    fun createTask( title:String,description:String,priority: Constants.Priority,reminderTime:Date, userId:Long): Long
-//    {
-//        return dbHelper.createTask(name,description,imageBitmap,userId)
-//    }
+
 
 
     private fun createDefaultCategories(userId:Long)
@@ -123,6 +120,11 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
         return dbHelper.fetchAllTasksOfUser(userId)
     }
 
+    fun fetchAllCategoriesOfUser(userId: Long):ArrayList<Category> {
+
+        return dbHelper.fetchAllCategoriesOfUser(userId)
+    }
+
     fun deleteTask(taskId:Long):Int
     {
         return dbHelper.deleteTask(taskId)
@@ -130,6 +132,20 @@ class TodoRepository(private val dbHelper: TodoDBHelper) {
 
     fun updateTask(task:Task): Int {
             return dbHelper.updateTask(task)
+    }
+
+    fun createCategory(name: String, description: String, imageBitmap: Bitmap?): Long {
+
+        val pref = CustomApplication.sharedPreferences
+        val userId = pref.getLong(Constants.USER_ID, -1L)
+
+        if (userId == -1L) {
+            return -1L
+        }
+
+
+        return dbHelper.createCategory(name, description, imageBitmap, userId);
+
     }
 
 

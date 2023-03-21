@@ -15,17 +15,14 @@ import com.example.todoapp.models.Category
 
 
 
-class RecyclerCategoryAdapter(val context: Context, var arrayList: ArrayList<Category>) :
+class RecyclerCategoryAdapter(val context: Context, var arrayList: ArrayList<Pair<Category,Boolean>>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-
-   
     private  val TAG = "MyTag"
     private var onItemClickListener: OnItemClickListener? = null
     fun set(onItemClickListener: OnItemClickListener) {
         this.onItemClickListener = onItemClickListener
     }
-
 
     init{
         Log.e(TAG, "init category adapter ", )
@@ -46,7 +43,7 @@ class RecyclerCategoryAdapter(val context: Context, var arrayList: ArrayList<Cat
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val taskHolder = holder as CategoryViewHolder
         Log.e(TAG, "onBindViewHolder: ", )
-        taskHolder.bind(arrayList[position])
+        taskHolder.bind(arrayList[position].first,arrayList[position].second)
 
     }
 
@@ -69,9 +66,11 @@ class RecyclerCategoryAdapter(val context: Context, var arrayList: ArrayList<Cat
 
         }
 
-        fun bind(category: Category) {
+        fun bind(category: Category,isChecked:Boolean) {
             textViewCategoryName.text = category.name
             textViewCategoryDescription.text = category.description
+            if(isChecked)
+                checkBoxSelectCategory.isChecked=true
 
 
             if (category.iconBitmap != null)
@@ -82,18 +81,16 @@ class RecyclerCategoryAdapter(val context: Context, var arrayList: ArrayList<Cat
             checkBoxSelectCategory.setOnCheckedChangeListener { buttonView, isChecked ->
                 if(isChecked)
                 {
-                    onItemClickListener.onItemChecked(category,adapterPosition)
+                    if(adapterPosition>=0)
+                        onItemClickListener?.onItemChecked(category,adapterPosition)
                 }
                 else
                 {
-                    Log.e("TAG", "unchecked: $adapterPosition")
-
+                    if(adapterPosition>=0)
+                        onItemClickListener?.onItemUnchecked(category,adapterPosition)
                 }
             }
-
         }
-
-
     }
 
     interface OnItemClickListener {
